@@ -6,6 +6,7 @@ import AppFooter from "./components/layout/AppFooter.vue";
 import AuthDialog from "./components/dialogs/AuthDialog.vue";
 import ActivityDialog from "./components/dialogs/ActivityDialog.vue";
 import ApplicantsDialog from "./components/dialogs/ApplicantsDialog.vue";
+import PublishFab from "./components/PublishFab.vue";
 import { usePageMotion } from "./composables/usePageMotion";
 import { useCampus } from "./stores/campus";
 
@@ -40,6 +41,7 @@ onMounted(async () => {
       <RouterView />
     </main>
     <AppFooter />
+    <PublishFab />
     <AuthDialog />
     <ActivityDialog />
     <ApplicantsDialog />
