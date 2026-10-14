@@ -1,0 +1,32 @@
+{
+  "name": "campus-mate",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "node --watch server/index.js",
+    "dev:web": "node scripts/dev-web.js",
+    "build": "node scripts/build.js",
+    "start": "node server/index.js",
+    "db:seed": "node server/seed.js",
+    "test": "node --test test/api.test.js"
+  },
+  "dependencies": {
+    "@vue/shared": "^3.5.13",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "element-plus": "^2.9.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "vite": "^6.2.0"
+  }
+}

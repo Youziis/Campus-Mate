@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.npm-cache/
+.env
+server/data/*.db*
+server/uploads/*
+!server/uploads/.gitkeep
