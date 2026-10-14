@@ -5,7 +5,24 @@
 - Stack: Vue 3, Vite, Element Plus, and a single large `src/App.vue` with global `src/style.css`.
 - Backend integration: core API test passes for health, login, activity listing, application approval, contact privacy, favorites, notifications, statistics, and administrator access.
 - Production build: passes. Vite reports a large JavaScript chunk warning, which should be addressed during component and route splitting.
-- Current risk: page state, dialogs, API calls, and markup are concentrated in one component. Visual work should extract components gradually without changing request behavior.
+- The former single component structure has been replaced with route views, shared components, and a centralized frontend store. Future page work should stay inside these boundaries.
+
+## Implemented frontend architecture
+
+The frontend now uses Vue Router and route level code splitting. `App.vue` only owns the application shell, global dialogs, and route outlet.
+
+| URL | Route name | Page component |
+| --- | --- | --- |
+| `/` | `discover` | `views/DiscoverView.vue` |
+| `/recommendations` | `recommendations` | `views/DiscoverView.vue` |
+| `/activities/:id` | `activity-detail` | `views/ActivityDetailView.vue` |
+| `/my/activities` | `my-activities` | `views/MyActivitiesView.vue` |
+| `/favorites` | `favorites` | `views/MyActivitiesView.vue` |
+| `/notifications` | `notifications` | `views/NotificationsView.vue` |
+| `/profile` | `profile` | `views/ProfileView.vue` |
+| `/admin` | `admin` | `views/AdminView.vue` |
+
+Shared API state and actions live in `stores/campus.js`. Reusable cards, layout, and dialogs live under `components/`; GSAP route transitions and hover behavior live under `composables/` and `directives/`.
 
 ## Branch and review policy
 

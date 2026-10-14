@@ -1,0 +1,7 @@
+<script setup>
+import { useCampus } from "../../stores/campus";
+const store = useCampus();
+</script>
+<template>
+  <el-dialog v-model="store.showAuth.value" width="430" class="auth-dialog" :show-close="true"><div class="dialog-heading"><span class="brand-mark large"><i></i><i></i><i></i></span><div class="eyebrow">加入校园同路人</div><h2>{{ store.authMode.value === "login" ? "欢迎回来" : "创建账号" }}</h2><p>登录后可以报名、收藏并获得兴趣推荐。</p></div><el-form @submit.prevent="store.login"><el-form-item v-if="store.authMode.value === 'register'"><el-input v-model="store.authForm.value.name" placeholder="你的昵称" size="large" /></el-form-item><el-form-item><el-input v-model="store.authForm.value.email" placeholder="校园邮箱" size="large" /></el-form-item><el-form-item><el-input v-model="store.authForm.value.password" type="password" show-password placeholder="密码（至少 8 位）" size="large" @keyup.enter="store.login" /></el-form-item><el-button type="primary" size="large" class="full-btn" :loading="store.busy.value" @click="store.login">{{ store.authMode.value === "login" ? "登录" : "创建账号" }}</el-button></el-form><p class="switch-auth">{{ store.authMode.value === "login" ? "还没有账号？" : "已经有账号？" }} <button @click="store.authMode.value = store.authMode.value === 'login' ? 'register' : 'login'">{{ store.authMode.value === "login" ? "立即注册" : "去登录" }}</button></p><div v-if="store.authMode.value === 'login'" class="demo-tip">演示账号：alice@campus.test / mate1234</div></el-dialog>
+</template>
