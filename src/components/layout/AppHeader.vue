@@ -43,9 +43,20 @@ function openRecommendations() {
     <div class="top-actions">
       <el-input v-model="store.query.value" class="search" placeholder="搜索活动或地点" clearable @keyup.enter="store.search"><template #prefix>⌕</template></el-input>
       <el-badge v-if="store.token.value" :value="store.unreadCount.value" :hidden="!store.unreadCount.value"><button class="icon-btn" aria-label="查看通知" @click="router.push({ name: 'notifications' })">◇</button></el-badge>
-      <el-dropdown v-if="store.token.value">
-        <button class="user-chip"><span class="avatar">{{ store.user.value?.name?.[0] }}</span><span>{{ store.user.value?.name }}</span><span aria-hidden="true">⌄</span></button>
-        <template #dropdown><el-dropdown-menu><el-dropdown-item @click="router.push({ name: 'profile' })">个人主页</el-dropdown-item><el-dropdown-item @click="router.push({ name: 'favorites' })">我的收藏</el-dropdown-item><el-dropdown-item v-if="store.user.value?.role === 'admin'" @click="openProtected('admin')">管理后台</el-dropdown-item><el-dropdown-item divided @click="store.logout">退出登录</el-dropdown-item></el-dropdown-menu></template>
+      <el-dropdown v-if="store.token.value" placement="bottom-end" popper-class="user-menu-popper">
+        <button class="user-chip" type="button" aria-label="打开用户菜单">
+          <span class="avatar">{{ store.user.value?.name?.[0] }}</span>
+          <span class="user-chip-name">{{ store.user.value?.name }}</span>
+          <span class="user-chip-arrow" aria-hidden="true">⌄</span>
+        </button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="router.push({ name: 'profile' })"><span class="menu-icon">○</span><span>个人主页</span></el-dropdown-item>
+            <el-dropdown-item @click="router.push({ name: 'favorites' })"><span class="menu-icon">♡</span><span>我的收藏</span></el-dropdown-item>
+            <el-dropdown-item v-if="store.user.value?.role === 'admin'" @click="openProtected('admin')"><span class="menu-icon">◇</span><span>管理后台</span></el-dropdown-item>
+            <el-dropdown-item divided @click="store.logout"><span class="menu-icon">↗</span><span>退出登录</span></el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
       </el-dropdown>
       <el-button v-else class="auth-trigger" text @click="store.showAuth.value = true">登录</el-button>
       <el-button class="publish-action" type="primary" @click="publish">发布活动</el-button>
