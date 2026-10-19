@@ -492,6 +492,9 @@ app.get("/api/activities/:id/contact", auth, (req, res) => {
       .status(403)
       .json({ error: "仅活动组织者和已通过成员可查看联系信息" });
   res.json({
+    organizer: db
+      .prepare("SELECT id,name,avatar,major,year,contact FROM users WHERE id=?")
+      .get(a.creator_id),
     members: db
       .prepare(
         "SELECT u.id,u.name,u.avatar,u.major,u.contact,x.status FROM applications x JOIN users u ON u.id=x.user_id JOIN activities a ON a.id=x.activity_id WHERE x.activity_id=? AND x.status='approved' AND x.user_id<>a.creator_id",

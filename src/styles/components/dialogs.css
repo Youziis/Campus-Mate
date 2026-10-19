@@ -143,3 +143,9 @@
 .applicant-organizer small { color: var(--cm-ink-muted); font-size: 11px; }
 .organizer-badge { color: var(--cm-brand); font-size: 11px; font-weight: 700; }
 
+.member-self { margin-bottom: 28px; background: var(--cm-surface-muted); }
+.member-section-label { margin: 22px 0 10px; color: var(--cm-ink-muted); font-size: 13px; }
+.applicants-dialog .applicant-row { flex-wrap: wrap; gap: 10px; }
+.applicants-dialog .applicant-info { min-width: 130px; overflow-wrap: anywhere; }
+.applicants-dialog .applicant-organizer { flex-wrap: wrap; }
+

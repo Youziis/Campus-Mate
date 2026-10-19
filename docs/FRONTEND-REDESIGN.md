@@ -1,5 +1,15 @@
 # Campus Mate frontend redesign plan
 
+## Unified activity member information
+
+Activity details retain GET /api/activities/:id. Organizers load applications
+through GET /api/activities/:id/applications and retain approval/rejection actions.
+Approved participants use GET /api/activities/:id/contact. Both roles now open
+ApplicantsDialog with the same member rows and contact copy controls. Participants
+see themselves without contact details, then the organizer and other members;
+only organizers see pending applications and review actions. Empty animation
+targets are skipped during page transitions, and the account user SVG path is fixed.
+
 ## AI assistant Live2D integration
 
 Current interface: the character appears on the left instead of the former chat

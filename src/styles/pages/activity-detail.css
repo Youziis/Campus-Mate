@@ -107,6 +107,20 @@
   display: block;
 }
 
+.detail-role-status {
+  padding: 7px 11px;
+  color: var(--cm-ink-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  background: var(--cm-surface-muted);
+  border-radius: 999px;
+}
+
+.detail-role-status.approved {
+  color: #197a5b;
+  background: #e4f5ed;
+}
+
 .host-detail b {
   font-size: 13px;
 }

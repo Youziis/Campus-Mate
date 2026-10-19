@@ -33,10 +33,12 @@ watch(() => route.params.id, loadActivity);
         <div class="host-detail motion-item">
           <span class="avatar">{{ store.selected.value.creator_name?.[0] }}</span>
           <div><b>{{ store.selected.value.creator_name }}</b><small>活动组织者</small></div>
-          <el-button v-if="store.selected.value.creator_id === store.user.value?.id" @click="store.openApplicants(store.selected.value)">成员与报名管理</el-button>
-          <template v-else-if="store.selected.value.is_member || store.selected.value.application_status === 'approved'"><el-button type="success" disabled>已通过审核</el-button><el-button size="small" @click="store.copyOrganizerContact">复制发起人联系方式</el-button><el-button size="small" @click="store.showMembers">查看活动成员</el-button></template>
+          <span v-if="store.selected.value.creator_id === store.user.value?.id" class="detail-role-status">你是活动发起者</span>
+          <span v-else-if="store.selected.value.is_member || store.selected.value.application_status === 'approved'" class="detail-role-status approved">已通过审核</span>
           <el-button v-else-if="store.selected.value.application_status === 'pending'" disabled>已申请，等待审核</el-button>
           <el-button v-else type="primary" @click="store.join(store.selected.value)">申请加入</el-button>
+          <el-button v-if="store.selected.value.creator_id === store.user.value?.id" @click="store.openApplicants(store.selected.value)">成员与信息</el-button>
+          <el-button v-else-if="store.selected.value.is_member || store.selected.value.application_status === 'approved'" @click="store.showMembers">成员与信息</el-button>
         </div>
         <div v-if="store.reviews.value.length" class="review-strip motion-item"><span>★ {{ store.reviews.value[0].rating }}</span><p>“{{ store.reviews.value[0].comment || "值得一起参加活动的校园伙伴" }}”</p></div>
         <button class="danger-link motion-item" @click="store.report(store.selected.value)">举报此活动</button>

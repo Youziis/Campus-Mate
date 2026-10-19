@@ -26,6 +26,7 @@ const activityDialogOpen = ref(false);
 const applicantsOpen = ref(false);
 const editing = ref(false);
 const applications = ref([]);
+const memberOrganizer = ref(null);
 const myApplications = ref([]);
 const myActivities = ref([]);
 const favoriteList = ref([]);
@@ -291,6 +292,7 @@ async function loadAdmin() {
 
 async function openApplicants(activity) {
   selected.value = activity;
+  memberOrganizer.value = null;
   try { applications.value = await api(`/activities/${activity.id}/applications`); applicantsOpen.value = true; }
   catch (error) { showError(error); }
 }
@@ -415,10 +417,9 @@ async function showMembers() {
   if (selected.value?.creator_id === user.value?.id) return openApplicants(selected.value);
   try {
     const data = await api(`/activities/${selected.value.id}/contact`);
-    const text = data.members.length
-      ? data.members.map((member) => `${member.name}${member.contact ? `：${member.contact}` : "：未填写联系方式"}`).join("\n")
-      : "当前还没有通过审核的成员";
-    await ElMessageBox.alert(text, "活动成员联系方式", { confirmButtonText: "知道了", customClass: "member-contact-dialog" });
+    memberOrganizer.value = data.organizer;
+    applications.value = data.members.map((member) => ({ ...member, user_id: member.id }));
+    applicantsOpen.value = true;
   }
   catch (error) { showError(error); }
 }
@@ -433,7 +434,7 @@ async function copyOrganizerContact() {
 const campus = {
   token, user, activities, interests, categories, notifications, stats, selected, query, category,
   showAuth, authMode, busy, avatarUploading, loading, loadError, activityDialogOpen, applicantsOpen,
-  editing, form, applications, myApplications, myActivities, favoriteList, reports,
+  editing, form, applications, memberOrganizer, myApplications, myActivities, favoriteList, reports,
   adminActivities, profile, availability, reviews, activeTab, authForm, unreadCount,
   initialize, load, search, login, logout, openDetail, loadActivity, toggleFavorite,
   join, newActivity, editActivity, saveActivity, loadMine, loadFavorites, loadProfile,
