@@ -7,6 +7,8 @@ import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
 import { db, notify } from "./db.js";
+import { registerAi } from "./ai.js";
+import { normalizeInterests, replaceInterests } from "./interests.js";
 const app = express(),
   secret = process.env.JWT_SECRET || "campus-mate-local-demo-secret-change-me";
 
@@ -44,7 +46,7 @@ const userSafe = (u) => {
 function activity(id, viewer) {
   const a = db
     .prepare(
-      `SELECT a.*,u.name creator_name,u.avatar creator_avatar,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='approved') member_count,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='pending') pending_count,EXISTS(SELECT 1 FROM favorites f WHERE f.activity_id=a.id AND f.user_id=?) is_favorite FROM activities a JOIN users u ON u.id=a.creator_id WHERE a.id=?`,
+      `SELECT a.*,COALESCE(c.name,a.category) category,c.cover category_cover,c.icon category_icon,u.name creator_name,u.avatar creator_avatar,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='approved') member_count,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='pending') pending_count,EXISTS(SELECT 1 FROM favorites f WHERE f.activity_id=a.id AND f.user_id=?) is_favorite FROM activities a LEFT JOIN activity_categories c ON c.id=a.category_id JOIN users u ON u.id=a.creator_id WHERE a.id=?`,
     )
     .get(viewer || 0, id);
   if (a) {
@@ -100,6 +102,13 @@ app.get("/api/auth/me", auth, (req, res) =>
 app.get("/api/interests", (_, res) =>
   res.json(db.prepare("SELECT * FROM interests ORDER BY name").all()),
 );
+app.get("/api/categories", (_, res) =>
+  res.json(
+    db
+      .prepare("SELECT id,name,cover,icon,sort_order FROM activity_categories WHERE enabled=1 ORDER BY sort_order,id")
+      .all(),
+  ),
+);
 
 // 用户资料：需要登录后才能查看；PATCH 只修改当前登录用户自己的资料。
 app.get("/api/users/:id", auth, (req, res) => {
@@ -123,19 +132,14 @@ app.get("/api/users/:id", auth, (req, res) => {
   res.json(u);
 });
 app.patch("/api/users/me", auth, (req, res) => {
+  const tags = req.body.interests === undefined ? null : normalizeInterests(req.body.interests);
   const fields = ["name", "bio", "campus", "major", "year", "avatar"];
   const updates = fields.filter((k) => req.body[k] !== undefined);
   if (updates.length)
     db.prepare(
       `UPDATE users SET ${updates.map((k) => `${k}=?`).join(",")} WHERE id=?`,
     ).run(...updates.map((k) => req.body[k]), req.user.id);
-  if (Array.isArray(req.body.interests)) {
-    db.prepare("DELETE FROM user_interests WHERE user_id=?").run(req.user.id);
-    const q = db.prepare(
-      "INSERT OR IGNORE INTO user_interests VALUES(?,(SELECT id FROM interests WHERE name=?))",
-    );
-    req.body.interests.forEach((n) => q.run(req.user.id, n));
-  }
+  if (tags !== null) replaceInterests(db, "user", req.user.id, tags);
   if (Array.isArray(req.body.availability)) {
     db.prepare("DELETE FROM availability WHERE user_id=?").run(req.user.id);
     const q = db.prepare(
@@ -227,6 +231,7 @@ app.get("/api/activities/:id", (req, res) => {
   a ? res.json(a) : res.sendStatus(404);
 });
 app.post("/api/activities", auth, (req, res) => {
+  const tags = normalizeInterests(req.body.interests ?? []);
   const {
     title,
     description,
@@ -246,25 +251,28 @@ app.post("/api/activities", auth, (req, res) => {
     new Date(starts_at) <= new Date()
   )
     return res.status(400).json({ error: "请填写完整信息并选择未来时间" });
+  const categoryRecord = db
+    .prepare("SELECT id,name FROM activity_categories WHERE name=? AND enabled=1")
+    .get(category);
+  if (!categoryRecord)
+    return res.status(400).json({ error: "活动种类不存在或已停用" });
   const r = db
     .prepare(
-      "INSERT INTO activities(creator_id,title,description,category,location,starts_at,ends_at,capacity,image) VALUES(?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO activities(creator_id,title,description,category,category_id,location,starts_at,ends_at,capacity,image) VALUES(?,?,?,?,?,?,?,?,?,?)",
     )
     .run(
       req.user.id,
       title,
       description,
-      category,
+      categoryRecord.name,
+      categoryRecord.id,
       location,
       starts_at,
       ends_at || null,
       Math.max(2, Number(capacity) || 6),
       req.body.image || null,
     );
-  const ins = db.prepare(
-    "INSERT OR IGNORE INTO activity_interests SELECT ?,id FROM interests WHERE name=?",
-  );
-  interests.forEach((i) => ins.run(r.lastInsertRowid, i));
+  replaceInterests(db, "activity", r.lastInsertRowid, tags);
   db.prepare(
     "INSERT INTO applications(activity_id,user_id,status,message) VALUES(?,?,'approved','组织者')",
   ).run(r.lastInsertRowid, req.user.id);
@@ -277,10 +285,10 @@ app.patch("/api/activities/:id", auth, (req, res) => {
   if (!a) return res.sendStatus(404);
   if (a.creator_id !== req.user.id && req.user.role !== "admin")
     return res.sendStatus(403);
+  const tags = req.body.interests === undefined ? null : normalizeInterests(req.body.interests);
   const keys = [
     "title",
     "description",
-    "category",
     "location",
     "starts_at",
     "ends_at",
@@ -289,10 +297,23 @@ app.patch("/api/activities/:id", auth, (req, res) => {
     "status",
   ];
   const set = keys.filter((k) => req.body[k] !== undefined);
+  if (req.body.category !== undefined) {
+    const categoryRecord = db
+      .prepare("SELECT id,name FROM activity_categories WHERE name=? AND enabled=1")
+      .get(req.body.category);
+    if (!categoryRecord)
+      return res.status(400).json({ error: "活动种类不存在或已停用" });
+    db.prepare("UPDATE activities SET category=?,category_id=? WHERE id=?").run(
+      categoryRecord.name,
+      categoryRecord.id,
+      a.id,
+    );
+  }
   if (set.length)
     db.prepare(
       `UPDATE activities SET ${set.map((k) => `${k}=?`).join(",")} WHERE id=?`,
     ).run(...set.map((k) => req.body[k]), a.id);
+  if (tags !== null) replaceInterests(db, "activity", a.id, tags);
   res.json(activity(a.id, req.user.id));
 });
 app.delete("/api/activities/:id", auth, (req, res) => {
@@ -418,7 +439,11 @@ app.get("/api/users/me/applications", auth, (req, res) =>
       .prepare(
         "SELECT a.id,a.creator_id,a.title,a.starts_at,a.location,x.status,x.id application_id FROM applications x JOIN activities a ON a.id=x.activity_id WHERE x.user_id=? ORDER BY a.starts_at",
       )
-      .all(req.user.id),
+      .all(req.user.id)
+      .map((row) => {
+        const details = activity(row.id, req.user.id);
+        return { ...details, ...row, activity_status: details.status };
+      }),
   ),
 );
 app.get("/api/favorites", auth, (req, res) =>
@@ -517,6 +542,7 @@ app.get("/api/users/:id/reviews", auth, (req, res) =>
 
 // 个性化推荐综合用户兴趣和填写的每周空闲时间。
 app.get("/api/recommendations", auth, (req, res) => {
+  const mode = req.query.mode === "try" ? "try" : "same";
   const names = db
     .prepare(
       "SELECT i.name FROM user_interests x JOIN interests i ON i.id=x.interest_id WHERE x.user_id=?",
@@ -526,25 +552,33 @@ app.get("/api/recommendations", auth, (req, res) => {
   const days = db
     .prepare("SELECT weekday,period FROM availability WHERE user_id=?")
     .all(req.user.id);
+  const ownNames = new Set(names);
+  const ownDays = new Set(days.map((item) => `${item.weekday}:${item.period}`));
   const rows = db
-    .prepare(
-      "SELECT a.id,COUNT(ai.interest_id) score FROM activities a LEFT JOIN activity_interests ai ON ai.activity_id=a.id LEFT JOIN interests i ON i.id=ai.interest_id WHERE a.status='open' AND a.creator_id<>? AND datetime(a.starts_at)>datetime('now') AND (i.name IN (" +
-        (names.map(() => "?").join(",") || "''") +
-        ")) GROUP BY a.id ORDER BY score DESC,a.starts_at",
-    )
-    .all(req.user.id, ...names);
-  res.json(
-    rows.map((x) => ({
-      ...activity(x.id, req.user.id),
-      recommendationScore: x.score,
-      matchedAvailability: days.length
-        ? days.some((d) => {
-            const dt = new Date(activity(x.id).starts_at);
-            return dt.getDay() === d.weekday;
-          })
-        : null,
-    })),
-  );
+    .prepare("SELECT id FROM activities WHERE status='open' AND creator_id<>? AND datetime(starts_at)>datetime('now') ORDER BY starts_at")
+    .all(req.user.id)
+    .map(({ id }) => activity(id, req.user.id))
+    .map((item) => {
+      const itemNames = new Set(item.interests || []);
+      const sharedInterests = [...itemNames].filter((name) => ownNames.has(name)).length;
+      const start = new Date(item.starts_at);
+      const weekday = start.getDay();
+      const hour = start.getHours() + start.getMinutes() / 60;
+      const period = hour >= 8.2 && hour < 9.95 ? "1-2"
+        : hour >= 10.25 && hour < 11.84 ? "3-4"
+          : hour >= 14.33 && hour < 15.92 ? "5-6"
+            : hour >= 16.25 && hour < 17.84 ? "7-8"
+              : hour >= 19 && hour < 21 ? "19:00-21:00"
+                : hour >= 21 && hour < 23 ? "21:00-23:00" : null;
+      const matchedAvailability = period ? ownDays.has(`${weekday}:${period}`) : false;
+      const score = mode === "same"
+        ? sharedInterests * 5 + (matchedAvailability ? 4 : 0)
+        : (sharedInterests === 0 ? 5 : Math.max(0, 4 - sharedInterests)) + (!ownNames.has(item.category) ? 2 : 0) + (matchedAvailability ? 1 : 0);
+      return { ...item, recommendationScore: score, sharedInterests, matchedAvailability, matchMode: mode };
+    })
+    .filter((item) => mode === "try" || item.recommendationScore > 0)
+    .sort((a, b) => b.recommendationScore - a.recommendationScore || new Date(a.starts_at) - new Date(b.starts_at));
+  res.json(rows);
 });
 
 // 通知接口始终按当前用户过滤，避免访问或修改其他人的通知。
@@ -645,6 +679,8 @@ app.post("/api/uploads", auth, upload.single("image"), (req, res) => {
   );
   res.status(201).json({ url });
 });
+
+registerAi(app, { auth, db });
 
 // 统一错误响应，避免把服务端堆栈信息暴露给前端。
 app.use((err, req, res, next) => {

@@ -21,7 +21,10 @@ export default defineConfig({
       { find: /^dayjs$/, replacement: `${dayjsEsm}index.js` },
     ],
   },
-  optimizeDeps: { noDiscovery: true },
+  optimizeDeps: {
+    noDiscovery: true,
+    include: ["pixi.js", "pixi-live2d-display/cubism4"],
+  },
   server: {
     proxy: {
       "/api": "http://localhost:3002",

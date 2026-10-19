@@ -50,13 +50,25 @@ db.exec(`
     UNIQUE (user_id, weekday, period)
   );
 
-  -- 活动主体和活动兴趣标签关联表。
+  -- 活动分类字典。cover 保存未上传活动图片时使用的默认封面路径。
+  CREATE TABLE IF NOT EXISTS activity_categories (
+    id INTEGER PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL,
+    cover TEXT NOT NULL,
+    icon TEXT DEFAULT '✦',
+    sort_order INTEGER DEFAULT 0,
+    enabled INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+
+  -- 活动主体和活动兴趣标签关联表。category 文本字段保留用于兼容旧数据和旧客户端。
   CREATE TABLE IF NOT EXISTS activities (
     id INTEGER PRIMARY KEY,
     creator_id INTEGER REFERENCES users(id),
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     category TEXT NOT NULL,
+    category_id INTEGER REFERENCES activity_categories(id),
     location TEXT NOT NULL,
     starts_at TEXT NOT NULL,
     ends_at TEXT,
@@ -138,6 +150,60 @@ db.exec(`
     mime TEXT NOT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
+
+  -- AI 搭子只保存当前用户自己的对话，activity_id 仅用于记住是在看哪条活动。
+  CREATE TABLE IF NOT EXISTS ai_sessions (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    activity_id INTEGER REFERENCES activities(id) ON DELETE SET NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE TABLE IF NOT EXISTS ai_messages (
+    id INTEGER PRIMARY KEY,
+    session_id INTEGER NOT NULL REFERENCES ai_sessions(id) ON DELETE CASCADE,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+
+  -- 每个用户一份 AI 角色设定。未保存时使用默认的学习搭子「小强」。
+  CREATE TABLE IF NOT EXISTS ai_personas (
+    user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    role_prompt TEXT NOT NULL,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+`);
+
+// 旧数据库没有 category_id；启动时执行轻量迁移，不要求用户删除原数据库。
+const activityColumns = db.prepare("PRAGMA table_info(activities)").all();
+if (!activityColumns.some((column) => column.name === "category_id")) {
+  db.exec("ALTER TABLE activities ADD COLUMN category_id INTEGER REFERENCES activity_categories(id)");
+}
+
+// 分类是业务基础字典，即使尚未运行 seed，也保证前端能够获取完整分类和默认封面。
+const defaultCategories = [
+  ["运动", "/covers/sport.jpg", "🏃", 10],
+  ["户外", "/covers/outdoor.jpg", "🌿", 20],
+  ["学习", "/covers/study.jpg", "📚", 30],
+  ["生活", "/covers/life.jpg", "☕", 40],
+  ["社交", "/covers/social.jpg", "✦", 50],
+  ["艺术", "/covers/art.jpg", "●", 60],
+  ["文化", "/covers/culture.jpg", "🎬", 70],
+];
+const upsertCategory = db.prepare(`
+  INSERT INTO activity_categories(name,cover,icon,sort_order,enabled)
+  VALUES(?,?,?,?,1)
+  ON CONFLICT(name) DO UPDATE SET
+    cover=excluded.cover,
+    icon=excluded.icon,
+    sort_order=excluded.sort_order
+`);
+defaultCategories.forEach((category) => upsertCategory.run(...category));
+db.exec(`
+  UPDATE activities
+  SET category_id=(SELECT id FROM activity_categories WHERE name=activities.category)
+  WHERE category_id IS NULL
 `);
 
 // 创建站内通知，供报名、审核和活动状态变更接口共用。

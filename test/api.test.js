@@ -98,6 +98,31 @@ test("core campus activity flow respects login, approval, privacy and admin acce
     const admin = await login("admin@campus.test", "admin123");
     assert.equal((await call("/admin/reports", admin)).status, 200);
     assert.equal((await call("/admin/reports", alice)).status, 403);
+    // Persist new tags, deduplicate them, and retain data after invalid input.
+    const self = await (await call("/auth/me", alice)).json();
+    const updateTags = (interests) => call("/users/me", alice, {
+      method: "PATCH", body: JSON.stringify({ interests }),
+    });
+    assert.equal((await updateTags("奶龙打卡  星空摄影\t奶龙打卡")).status, 200);
+    const profileTags = (await (await call(`/users/${self.id}`, alice)).json()).interests;
+    assert.deepEqual([...profileTags].sort(), ["奶龙打卡", "星空摄影"].sort());
+    const catalog = await (await req("/interests")).json();
+    assert.equal(catalog.filter((tag) => tag.name === "奶龙打卡").length, 1);
+    assert.equal((await updateTags([123])).status, 400);
+    assert.deepEqual((await (await call(`/users/${self.id}`, alice)).json()).interests, profileTags);
+    const created = await call("/activities", alice, {
+      method: "POST", body: JSON.stringify({ title: "Custom tags", description: "Test", category: "学习", location: "Library", starts_at: new Date(Date.now() + 86400000).toISOString(), interests: ["奶龙打卡", "新活动标签"] }),
+    });
+    assert.equal(created.status, 201);
+    const taggedActivity = await created.json();
+    assert.ok(taggedActivity.interests.includes("新活动标签"));
+    const edited = await call(`/activities/${taggedActivity.id}`, alice, {
+      method: "PATCH", body: JSON.stringify({ interests: "自定义编辑标签 自定义编辑标签" }),
+    });
+    assert.equal(edited.status, 200);
+    assert.deepEqual((await edited.json()).interests, ["自定义编辑标签"]);
+    assert.equal((await updateTags([])).status, 200);
+    assert.deepEqual((await (await call(`/users/${self.id}`, alice)).json()).interests, []);
     console.log(
       "Core API flow verified: health, login, activity list, application approval, contact privacy, favorites, notifications, stats and admin guard.",
     );

@@ -1,0 +1,12 @@
+<script setup>
+import InterestInput from "../InterestInput.vue";
+import { computed } from "vue";
+import { cats, useCampus } from "../../stores/campus";
+const store = useCampus();
+const selectedCategory = computed(() => store.categories.value.find((item) => item.name === store.form.value.category));
+</script>
+<template>
+  <el-dialog v-model="store.activityDialogOpen.value" :title="store.editing.value ? '编辑活动' : '发起一个活动'" width="640" class="activity-dialog"><div class="dialog-intro"><span>把时间、地点和期待说清楚，更容易遇到合适的搭子。</span></div><el-form label-position="top"><el-form-item label="活动名称"><el-input v-model="store.form.value.title" placeholder="例如：周五晚羽毛球双打" /></el-form-item><div class="form-cols"><el-form-item label="活动类型"><el-select v-model="store.form.value.category"><el-option v-for="item in cats.slice(1)" :key="item" :label="item" :value="item" /></el-select></el-form-item><el-form-item label="活动地点"><el-input v-model="store.form.value.location" placeholder="例如：体育馆 2 号馆" /></el-form-item></div><div class="form-cols"><el-form-item label="开始时间"><el-date-picker v-model="store.form.value.starts_at" type="datetime" format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DDTHH:mm" placeholder="选择时间" /></el-form-item><el-form-item label="结束时间"><el-date-picker v-model="store.form.value.ends_at" type="datetime" format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DDTHH:mm" placeholder="可选" /></el-form-item></div><div class="form-cols"><el-form-item label="人数上限"><el-input-number v-model="store.form.value.capacity" :min="2" :max="100" /></el-form-item><el-form-item label="兴趣标签"><InterestInput v-model="store.form.value.interests" /></el-form-item></div><el-form-item label="活动介绍"><el-input v-model="store.form.value.description" type="textarea" :rows="4" placeholder="介绍活动内容、适合人群和需要准备的东西…" /></el-form-item><el-form-item label="活动图片"><label class="upload-box"><span>＋ 上传 JPG / PNG / WebP，最大 5MB；不上传则使用分类默认封面</span><input type="file" accept="image/png,image/jpeg,image/webp" hidden @change="store.uploadImage" /><img v-if="store.form.value.image || selectedCategory?.cover" :src="store.form.value.image || selectedCategory?.cover" alt="活动图片预览" /></label></el-form-item></el-form><template #footer><el-button @click="store.activityDialogOpen.value = false">取消</el-button><el-button type="primary" @click="store.saveActivity">{{ store.editing.value ? "保存修改" : "发布活动" }}</el-button></template></el-dialog>
+</template>
+
+<style src="../../styles/components/dialogs.css"></style>
