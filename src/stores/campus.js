@@ -320,7 +320,12 @@ function toggleAvailability(weekday, period) {
 }
 
 async function saveProfile() {
-  try { await api("/users/me", { method: "PATCH", body: JSON.stringify(profile.value) }); ElMessage.success("资料已保存"); await load(); }
+  try {
+    await api("/users/me", { method: "PATCH", body: JSON.stringify(profile.value) });
+    await load();
+    await loadProfile();
+    ElMessage.success("资料已保存");
+  }
   catch (error) { showError(error); }
 }
 
@@ -399,7 +404,13 @@ async function reviewMember(activityId, reviewee) {
 }
 
 async function showMembers() {
-  try { const data = await api(`/activities/${selected.value.id}/contact`); ElMessage.info(data.members.map((member) => member.name).join("、")); }
+  try {
+    const data = await api(`/activities/${selected.value.id}/contact`);
+    const text = data.members.length
+      ? data.members.map((member) => `${member.name}${member.contact ? `：${member.contact}` : "：未填写联系方式"}`).join("\n")
+      : "当前还没有通过审核的成员";
+    await ElMessageBox.alert(text, "活动成员联系方式", { confirmButtonText: "知道了", customClass: "member-contact-dialog" });
+  }
   catch (error) { showError(error); }
 }
 

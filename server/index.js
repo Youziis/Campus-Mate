@@ -120,6 +120,9 @@ app.get("/api/users/:id", auth, (req, res) => {
       .get(req.params.id),
   );
   if (!u) return res.sendStatus(404);
+  if (Number(req.params.id) === req.user.id) {
+    u.contact = db.prepare("SELECT contact FROM users WHERE id=?").get(req.user.id)?.contact || "";
+  }
   u.interests = db
     .prepare(
       "SELECT i.name FROM interests i JOIN user_interests x ON x.interest_id=i.id WHERE x.user_id=?",
@@ -133,7 +136,7 @@ app.get("/api/users/:id", auth, (req, res) => {
 });
 app.patch("/api/users/me", auth, (req, res) => {
   const tags = req.body.interests === undefined ? null : normalizeInterests(req.body.interests);
-  const fields = ["name", "bio", "campus", "major", "year", "avatar"];
+  const fields = ["name", "bio", "campus", "major", "year", "avatar", "contact"];
   const updates = fields.filter((k) => req.body[k] !== undefined);
   if (updates.length)
     db.prepare(
@@ -488,7 +491,7 @@ app.get("/api/activities/:id/contact", auth, (req, res) => {
   res.json({
     members: db
       .prepare(
-        "SELECT u.id,u.name,u.avatar,u.major,x.status FROM applications x JOIN users u ON u.id=x.user_id WHERE x.activity_id=? AND x.status='approved'",
+        "SELECT u.id,u.name,u.avatar,u.major,u.contact,x.status FROM applications x JOIN users u ON u.id=x.user_id WHERE x.activity_id=? AND x.status='approved'",
       )
       .all(req.params.id),
   });
