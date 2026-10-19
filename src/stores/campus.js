@@ -368,6 +368,20 @@ async function markAllRead() {
   catch (error) { showError(error); }
 }
 
+async function deleteNotification(notification) {
+  if (notification.deleting) return;
+  try {
+    await ElMessageBox.confirm("确定删除这条通知吗？", "删除通知", { type: "warning", confirmButtonText: "删除", cancelButtonText: "保留" });
+    if (notification.deleting) return;
+    notification.deleting = true;
+    await api(`/notifications/${notification.id}`, { method: "DELETE" });
+    notifications.value = notifications.value.filter((item) => item.id !== notification.id);
+    ElMessage.success("通知已删除");
+  } catch (error) {
+    if (error !== "cancel" && error !== "close") showError(error);
+  } finally { notification.deleting = false; }
+}
+
 async function report(activity) {
   try {
     const { value } = await ElMessageBox.prompt("请描述举报原因", "举报活动");
@@ -459,7 +473,7 @@ const campus = {
   initialize, load, search, login, logout, openDetail, loadActivity, toggleFavorite,
   join, newActivity, editActivity, saveActivity, loadMine, loadFavorites, loadProfile,
   loadAdmin, openApplicants, reviewApp, withdraw, cancel, toggleAvailability,
-  saveProfile, markRead, markAllRead, report, recommend, uploadImage, uploadAvatar, reportAction,
+  saveProfile, markRead, markAllRead, deleteNotification, report, recommend, uploadImage, uploadAvatar, reportAction,
   adminRemove, reviewMember, showMembers, copyOrganizerContact,
 };
 

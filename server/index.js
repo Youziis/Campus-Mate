@@ -622,6 +622,12 @@ app.patch("/api/notifications/:id/read", auth, (req, res) => {
   );
   res.json({ ok: true });
 });
+app.delete("/api/notifications/:id", auth, (req, res) => {
+  const result = db.prepare("DELETE FROM notifications WHERE id=? AND user_id=?")
+    .run(req.params.id, req.user.id);
+  if (!result.changes) return res.status(404).json({ error: "通知不存在" });
+  res.json({ ok: true });
+});
 app.post("/api/notifications/read-all", auth, (req, res) => {
   db.prepare("UPDATE notifications SET read=1 WHERE user_id=?").run(
     req.user.id,

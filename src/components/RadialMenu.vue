@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { gsap } from "gsap";
 import StudyAssistant from "./StudyAssistant.vue";
@@ -16,7 +16,11 @@ let context;
 const actions = [
   {
     label: "浏览活动",
-    run() {
+    async run() {
+      if (router.currentRoute.value.name !== "discover") {
+        await router.push({ name: "discover" });
+        await nextTick();
+      }
       document.querySelector("#activity-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
     },
   },

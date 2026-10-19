@@ -1,5 +1,20 @@
 # Campus Mate frontend redesign plan
 
+## Global quick menu
+
+App mounts one persistent RadialMenu on every route. All pages share browse,
+publish, recommendations, my activities and AI companion actions. Browsing from
+another page navigates to discovery before scrolling to the activity list.
+Existing login checks and publish actions are preserved.
+
+## Notification deletion
+
+Notifications retain read and mark-all-read actions. Each row now has a separate
+delete button with confirmation and pending feedback. DELETE /api/notifications/:id
+enforces ownership; successful deletion removes the local row and updates the
+computed unread badge. Failures retain the notification. Multiline cancellation
+announcements preserve line breaks.
+
 ## Activity cancellation form
 
 The hosted activity card's cancel action now opens CancellationDialog. It requires

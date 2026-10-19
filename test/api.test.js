@@ -137,6 +137,12 @@ test("core campus activity flow respects login, approval, privacy and admin acce
     assert.ok(afterCancellation.some((item) => item.title === "活动已取消" && item.body.includes(a.title) && item.body.includes("场馆临时关闭") && item.body.includes("请勿前往集合点")));
     assert.equal((await call(`/activities/${a.id}`, bo, { method: "DELETE" })).status, 404);
     assert.equal((await (await call("/notifications", mei)).json()).length, afterCancellation.length);
+    const deletionTarget = afterCancellation.find((item) => item.title === "活动已取消");
+    assert.equal((await call(`/notifications/${deletionTarget.id}`, alice, { method: "DELETE" })).status, 404);
+    assert.ok((await (await call("/notifications", mei)).json()).some((item) => item.id === deletionTarget.id));
+    assert.equal((await call(`/notifications/${deletionTarget.id}`, mei, { method: "DELETE" })).status, 200);
+    assert.ok(!(await (await call("/notifications", mei)).json()).some((item) => item.id === deletionTarget.id));
+    assert.equal((await call(`/notifications/${deletionTarget.id}`, mei, { method: "DELETE" })).status, 404);
     console.log(
       "Core API flow verified: health, login, activity list, application approval, contact privacy, favorites, notifications, stats and admin guard.",
     );
