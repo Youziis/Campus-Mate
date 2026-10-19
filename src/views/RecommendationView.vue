@@ -26,7 +26,7 @@
       @mouseenter="pauseReel"
       @mouseleave="resumeReel"
     >
-      <div v-if="store.loading.value" class="deck-loading">
+      <div v-if="store.recommendationLoading.value" class="deck-loading">
         <span></span><b>正在整理你的卡组</b><small>读取兴趣与空闲时间…</small>
       </div>
       <div v-else-if="!deck.length" class="deck-loading">
@@ -201,7 +201,7 @@ async function spin(onPeak) {
 }
 
 async function swapDeck() {
-  deck.value = shuffled(store.activities.value);
+  deck.value = shuffled(store.recommendations.value);
   await nextTick();
   measure();
 }
@@ -249,7 +249,7 @@ function closeDrawn() {
 async function loadDeck() {
   await store.initialize();
   await store.recommend();
-  deck.value = shuffled(store.activities.value);
+  deck.value = shuffled(store.recommendations.value);
   await setupReel();
 
   if (!prefersReducedMotion()) {
@@ -264,7 +264,7 @@ async function changeMode(nextMode) {
   if (mode.value === nextMode || shuffling.value) return;
   mode.value = nextMode;
   await store.recommend(nextMode);
-  deck.value = shuffled(store.activities.value);
+  deck.value = shuffled(store.recommendations.value);
   await setupReel();
 }
 

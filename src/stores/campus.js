@@ -9,6 +9,8 @@ let initializationPromise;
 const token = ref(localStorage.getItem("cm-token") || "");
 const user = ref(null);
 const activities = ref([]);
+const recommendations = ref([]);
+const recommendationLoading = ref(false);
 const interests = ref([]);
 const categories = ref([]);
 const notifications = ref([]);
@@ -392,10 +394,10 @@ async function report(activity) {
 
 async function recommend(mode = "same") {
   if (!token.value) return (showAuth.value = true);
-  loading.value = true;
-  try { activities.value = await api(`/recommendations?mode=${encodeURIComponent(mode)}`); }
+  recommendationLoading.value = true;
+  try { recommendations.value = await api(`/recommendations?mode=${encodeURIComponent(mode)}`); }
   catch (error) { showError(error); }
-  finally { loading.value = false; }
+  finally { recommendationLoading.value = false; }
 }
 
 async function uploadImage(event) {
@@ -465,6 +467,7 @@ async function copyOrganizerContact() {
 }
 
 const campus = {
+  recommendations, recommendationLoading,
   cancellationOpen, cancellationTarget, cancellationForm, cancellationBusy, submitCancellation,
   token, user, activities, interests, categories, notifications, stats, selected, query, category,
   showAuth, authMode, busy, avatarUploading, loading, loadError, activityDialogOpen, applicantsOpen,

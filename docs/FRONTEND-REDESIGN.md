@@ -1,5 +1,12 @@
 # Campus Mate frontend redesign plan
 
+## Discovery list restoration
+
+Recommendation results and loading state now live separately from discovery
+activities. Visiting recommendations no longer replaces the discovery catalogue
+or toggles its skeleton. Discovery finishes its current Flip transition before
+starting another category filter or unmounting, releasing temporary layout state.
+
 ## Global quick menu
 
 App mounts one persistent RadialMenu on every route. All pages share browse,
