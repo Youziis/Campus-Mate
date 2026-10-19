@@ -10,6 +10,7 @@ const token = ref(localStorage.getItem("cm-token") || "");
 const user = ref(null);
 const activities = ref([]);
 const interests = ref([]);
+const categories = ref([]);
 const notifications = ref([]);
 const stats = ref({});
 const selected = ref(null);
@@ -18,6 +19,7 @@ const category = ref("全部");
 const showAuth = ref(false);
 const authMode = ref("login");
 const busy = ref(false);
+const avatarUploading = ref(false);
 const loading = ref(true);
 const loadError = ref("");
 const activityDialogOpen = ref(false);
@@ -35,17 +37,38 @@ const reviews = ref([]);
 const activeTab = ref("activities");
 const authForm = ref({ email: "", password: "", name: "" });
 
-export const cats = ["全部", "运动", "户外", "学习", "生活", "社交", "艺术"];
-export const days = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-export const periods = ["上午", "下午", "晚上"];
-const categoryIcons = { 运动: "🏃", 户外: "🌿", 学习: "📚", 生活: "☕", 社交: "✦", 艺术: "●" };
+export const cats = computed(() => ["全部", ...categories.value.map((item) => item.name)]);
+export const days = [
+  { label: "周一", weekday: 1 },
+  { label: "周二", weekday: 2 },
+  { label: "周三", weekday: 3 },
+  { label: "周四", weekday: 4 },
+  { label: "周五", weekday: 5 },
+  { label: "周六", weekday: 6 },
+  { label: "周日", weekday: 0 },
+];
+export const periods = [
+  { value: "1-2", label: "上午 1", time: "08:20–09:55" },
+  { value: "3-4", label: "上午 2", time: "10:15–11:50" },
+  { value: "5-6", label: "下午 1", time: "14:20–15:55" },
+  { value: "7-8", label: "下午 2", time: "16:15–17:50" },
+  { value: "19:00-21:00", label: "晚 1", time: "19:00–21:00" },
+  { value: "21:00-23:00", label: "晚 2", time: "21:00–23:00" },
+];
+
+const legacyPeriodMap = {
+  上午: ["1-2", "3-4"],
+  下午: ["5-6", "7-8"],
+  晚上: ["19:00-21:00", "21:00-23:00"],
+};
+const categoryIcons = { 运动: "🏃", 户外: "🌿", 学习: "📚", 生活: "☕", 社交: "✦", 艺术: "●", 文化: "🎬" };
 
 const form = ref(emptyActivity());
 const headers = computed(() => (token.value ? { Authorization: `Bearer ${token.value}` } : {}));
 const unreadCount = computed(() => notifications.value.filter((item) => !item.read).length);
 
 function emptyActivity() {
-  return { title: "", description: "", category: "运动", location: "", starts_at: "", ends_at: "", capacity: 6, interests: [], image: "" };
+  return { title: "", description: "", category: categories.value[0]?.name || "运动", location: "", starts_at: "", ends_at: "", capacity: 6, interests: [], image: "" };
 }
 
 export function formatDate(value, includeTime = false) {
@@ -57,7 +80,14 @@ export function formatDate(value, includeTime = false) {
 }
 
 export function iconFor(categoryName) {
-  return categoryIcons[categoryName] || "✦";
+  return categories.value.find((item) => item.name === categoryName)?.icon || categoryIcons[categoryName] || "✦";
+}
+
+export function coverStyle(activity, overlay = "rgba(21,39,34,.6)") {
+  const cover = activity?.image || activity?.category_cover;
+  return cover
+    ? { backgroundImage: `linear-gradient(0deg,${overlay},transparent 68%),url(${cover})` }
+    : {};
 }
 
 async function api(path, options = {}) {
@@ -83,7 +113,11 @@ async function load() {
   loading.value = true;
   loadError.value = "";
   try {
-    [activities.value, interests.value] = await Promise.all([api("/activities"), api("/interests")]);
+    [activities.value, interests.value, categories.value] = await Promise.all([
+      api("/activities"),
+      api("/interests"),
+      api("/categories"),
+    ]);
     if (token.value) {
       user.value = await api("/auth/me");
       [notifications.value, stats.value, profile.value] = await Promise.all([
@@ -226,6 +260,16 @@ async function loadProfile() {
   if (!user.value) return;
   try {
     [profile.value, availability.value] = await Promise.all([api(`/users/${user.value.id}`), api("/users/me/availability")]);
+    availability.value = availability.value.flatMap((item) => {
+      const replacements = legacyPeriodMap[item.period];
+      return replacements
+        ? replacements.map((period) => ({ weekday: item.weekday, period }))
+        : [item];
+    }).filter((item, index, list) =>
+      list.findIndex((candidate) =>
+        candidate.weekday === item.weekday && candidate.period === item.period
+      ) === index
+    );
     profile.value.availability = availability.value;
   } catch (error) { showError(error); }
 }
@@ -298,10 +342,10 @@ async function report(activity) {
   } catch (error) { if (error !== "cancel") showError(error); }
 }
 
-async function recommend() {
+async function recommend(mode = "same") {
   if (!token.value) return (showAuth.value = true);
   loading.value = true;
-  try { activities.value = await api("/recommendations"); }
+  try { activities.value = await api(`/recommendations?mode=${encodeURIComponent(mode)}`); }
   catch (error) { showError(error); }
   finally { loading.value = false; }
 }
@@ -313,6 +357,27 @@ async function uploadImage(event) {
   data.append("image", file);
   try { form.value.image = (await api("/uploads", { method: "POST", body: data })).url; ElMessage.success("图片已上传"); }
   catch (error) { showError(error); }
+}
+
+async function uploadAvatar(event) {
+  const input = event.target;
+  const file = input.files?.[0];
+  if (!file || avatarUploading.value) return;
+  const data = new FormData();
+  data.append("image", file);
+  avatarUploading.value = true;
+  try {
+    const { url } = await api("/uploads", { method: "POST", body: data });
+    await api("/users/me", { method: "PATCH", body: JSON.stringify({ avatar: url }) });
+    profile.value.avatar = url;
+    if (user.value) user.value.avatar = url;
+    ElMessage.success("头像已更新");
+  } catch (error) {
+    showError(error);
+  } finally {
+    avatarUploading.value = false;
+    input.value = "";
+  }
 }
 
 async function reportAction(item, status) {
@@ -339,14 +404,14 @@ async function showMembers() {
 }
 
 const campus = {
-  token, user, activities, interests, notifications, stats, selected, query, category,
-  showAuth, authMode, busy, loading, loadError, activityDialogOpen, applicantsOpen,
+  token, user, activities, interests, categories, notifications, stats, selected, query, category,
+  showAuth, authMode, busy, avatarUploading, loading, loadError, activityDialogOpen, applicantsOpen,
   editing, form, applications, myApplications, myActivities, favoriteList, reports,
   adminActivities, profile, availability, reviews, activeTab, authForm, unreadCount,
   initialize, load, search, login, logout, openDetail, loadActivity, toggleFavorite,
   join, newActivity, editActivity, saveActivity, loadMine, loadFavorites, loadProfile,
   loadAdmin, openApplicants, reviewApp, withdraw, cancel, toggleAvailability,
-  saveProfile, markRead, markAllRead, report, recommend, uploadImage, reportAction,
+  saveProfile, markRead, markAllRead, report, recommend, uploadImage, uploadAvatar, reportAction,
   adminRemove, reviewMember, showMembers,
 };
 

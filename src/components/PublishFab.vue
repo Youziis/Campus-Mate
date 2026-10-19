@@ -36,3 +36,5 @@ function hover(active) {
     <span class="publish-fab-tip">发布活动</span>
   </button>
 </template>
+
+<style src="../styles/components/publish-fab.css"></style>

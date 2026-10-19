@@ -1,5 +1,29 @@
 # Campus Mate frontend redesign plan
 
+## AI assistant Live2D integration
+
+Current interface: the character appears on the left instead of the former chat
+panel. Single click toggles a bottom-centered composer; double click opens the
+function menu. The latest assistant reply appears in a scrollable character
+bubble. Menu actions include history, persona, touch interactions, and a named
+1–180 minute timer. Timers use a deadline to avoid background-tab interval drift,
+but remain page-local and are cleared when the assistant closes or page reloads.
+Browser verification covered real AI replies, double-click isolation, timer
+creation, settings, history, and model cleanup with no page errors.
+
+- Existing actions: open/close assistant, send messages, view session history,
+  customize persona, and use study timer.
+- Existing API calls: `/api/ai/sessions`, `/api/ai/sessions/:id`,
+  `/api/ai/sessions/:id/messages`, `/api/ai/persona`.
+- `StudyAssistant.vue` mounts `Live2DAvatar.vue` while the assistant is visible.
+  The character floats at the bottom right and is destroyed on close.
+- Loads local `public/hiyori_vts/hiyori.model3.json` and local Cubism Web Core.
+  Registers the existing m01 idle motion at runtime; original model files stay intact.
+- Renderer uses 30 FPS, caps pixel ratio at 1.5, and pauses on hidden tabs.
+- Validation: production build and core API test passed; Edge browser smoke
+  confirmed visible model, no browser errors, and canvas removal on close.
+- Speech, lip sync, and AI-driven expression selection are future work.
+
 ## Baseline
 
 - Stack: Vue 3, Vite, Element Plus, and a single large `src/App.vue` with global `src/style.css`.
@@ -14,15 +38,17 @@ The frontend now uses Vue Router and route level code splitting. `App.vue` only 
 | URL | Route name | Page component |
 | --- | --- | --- |
 | `/` | `discover` | `views/DiscoverView.vue` |
-| `/recommendations` | `recommendations` | `views/DiscoverView.vue` |
+| `/recommendations` | `recommendations` | `views/RecommendationView.vue` |
 | `/activities/:id` | `activity-detail` | `views/ActivityDetailView.vue` |
 | `/my/activities` | `my-activities` | `views/MyActivitiesView.vue` |
-| `/favorites` | `favorites` | `views/MyActivitiesView.vue` |
-| `/notifications` | `notifications` | `views/NotificationsView.vue` |
-| `/profile` | `profile` | `views/ProfileView.vue` |
-| `/admin` | `admin` | `views/AdminView.vue` |
+| `/account/favorites` | `favorites` | `components/layout/AccountLayout.vue` → `views/MyActivitiesView.vue` |
+| `/account/notifications` | `notifications` | `components/layout/AccountLayout.vue` → `views/NotificationsView.vue` |
+| `/account/profile` | `profile` | `components/layout/AccountLayout.vue` → `views/ProfileView.vue` |
+| `/account/admin` | `admin` | `components/layout/AccountLayout.vue` → `views/AdminView.vue` |
 
 Shared API state and actions live in `stores/campus.js`. Reusable cards, layout, and dialogs live under `components/`; GSAP route transitions and hover behavior live under `composables/` and `directives/`.
+
+Profile, favorites, notifications, and administration share `AccountLayout.vue`: navigation stays in the left column while the selected route renders in the right content column. “我的活动” remains a standalone page and is exposed immediately to the left of the account avatar.
 
 ## Branch and review policy
 
@@ -57,6 +83,7 @@ Design work:
 - Replace the decorative hero with a useful discovery lead area.
 - Improve search, categories, date/capacity scanning, card hierarchy, and responsive behavior.
 - Add loading, empty, and failed request presentations.
+- Give recommendations a separate card deck experience: staggered full-screen cards, shuffle refresh, random draw, detail navigation, loading, empty, and error states.
 
 ### 2. Activity detail and application
 
@@ -105,6 +132,8 @@ Design work:
 Preserve:
 
 - Profile update, interests, weekly availability, reviews, and personal statistics.
+- Current API contract: `GET /api/users/:id`, `GET /api/users/me/availability`, `GET /api/users/me/stats`, and `PATCH /api/users/me`.
+- Current user actions: upload and replace an avatar; edit public name, bio, major and year; select interests; toggle weekly availability; save the profile; open personal activities, favorites, notifications, and administrator tools; log out.
 
 Design work:
 

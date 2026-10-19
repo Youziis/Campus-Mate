@@ -1,0 +1,66 @@
+.notification-list > button {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 19px;
+  color: inherit;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid var(--cm-line);
+  background: transparent;
+}
+
+.notification-list > button:last-of-type {
+  border-bottom: 0;
+}
+
+.notification-list > button.unread {
+  background: #f0f4ed;
+}
+
+.notif-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--cm-brand);
+  background: #dfeae2;
+  border-radius: 10px;
+}
+
+.notification-copy,
+.notification-copy b,
+.notification-copy span,
+.notification-copy small {
+  display: block;
+}
+
+.notification-copy {
+  flex: 1;
+}
+
+.notification-copy b {
+  font-size: 13px;
+}
+
+.notification-copy span {
+  margin: 6px 0;
+  color: var(--cm-ink-muted);
+  font-size: 12px;
+}
+
+.notification-copy small {
+  color: #8a958f;
+  font-size: 9px;
+}
+
+.notification-list i {
+  width: 7px;
+  height: 7px;
+  margin-top: 8px;
+  background: var(--cm-accent);
+  border-radius: 50%;
+}
+.notification-copy small { font-size:11px; }

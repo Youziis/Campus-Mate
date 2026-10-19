@@ -2,9 +2,9 @@
 
 ## Product character
 
-Campus Mate is a student activity matching product. The interface should feel like a well curated campus notice board: warm, active, trustworthy, and easy to scan. It should avoid the visual language of a corporate analytics dashboard and the common purple gradient AI style.
+Campus Mate is a student activity matching product built around chance encounters. The interface should feel like a contemporary campus tarot deck: youthful, energetic, a little mysterious, trustworthy, and easy to scan. Card imagery, constellations, numbered details, symbolic marks, and the ritual of drawing a card connect activity matching with serendipity. Avoid occult horror imagery and generic purple gradient AI styling; use bold solid color fields, sharp contrast, and restrained celestial details.
 
-The memorable quality is a layered editorial activity board: strong event imagery, compact factual labels, warm paper like surfaces, and restrained green accents.
+The memorable quality is a deck of campus possibilities: vivid card faces, dark night-sky anchors, warm ivory reading surfaces, coral decisions, and gold star details.
 
 ## Color palette and roles
 
@@ -12,19 +12,21 @@ Use CSS custom properties and semantic names. Do not place new raw colors throug
 
 | Token | Value | Role |
 | --- | --- | --- |
-| `--cm-canvas` | `#F6F4EE` | App background |
-| `--cm-surface` | `#FFFEFA` | Primary surface |
-| `--cm-surface-muted` | `#ECEFE7` | Secondary surface and selected filters |
-| `--cm-ink` | `#20332F` | Primary text |
-| `--cm-ink-muted` | `#66756F` | Secondary text |
-| `--cm-line` | `#DDE3DC` | Borders and dividers |
-| `--cm-brand` | `#176B52` | Primary actions and active state |
-| `--cm-brand-hover` | `#105540` | Hover and pressed action |
-| `--cm-accent` | `#D9834A` | Time sensitive and recommendation accents |
-| `--cm-danger` | `#B84A43` | Destructive and error state |
-| `--cm-success` | `#377A57` | Confirmed and completed state |
+| `--cm-canvas` | `#F7F3FF` | Pale lavender app background |
+| `--cm-surface` | `#FFFCF7` | Warm ivory card face |
+| `--cm-surface-muted` | `#EEE8FF` | Selected filters and secondary surfaces |
+| `--cm-ink` | `#25183F` | Deep plum primary text |
+| `--cm-ink-muted` | `#746987` | Secondary text |
+| `--cm-line` | `#DED4ED` | Lavender borders and dividers |
+| `--cm-brand` | `#6D3CEB` | Primary actions and active state |
+| `--cm-brand-hover` | `#5423C8` | Hover and pressed action |
+| `--cm-accent` | `#FF6F61` | Decisions, matches, and notifications |
+| `--cm-gold` | `#F4C95D` | Stars, card numbering, and fortunate moments |
+| `--cm-night` | `#19132F` | Immersive card deck sections |
+| `--cm-danger` | `#D94D68` | Destructive and error state |
+| `--cm-success` | `#2F9E79` | Confirmed and completed state |
 
-Accent colors should mark decisions and status. Large backgrounds should use neutral canvas and surface colors.
+Violet owns navigation and primary actions, coral marks human decisions, and gold appears only on card symbols and lucky moments. Large light pages use the lavender canvas; immersive recommendation surfaces use the night token.
 
 ## Typography
 
@@ -33,6 +35,7 @@ Accent colors should mark decisions and status. Large backgrounds should use neu
 - Dates, counts, and compact metadata: enable `font-variant-numeric: tabular-nums`.
 - Body copy should stay near 65 Chinese characters per line on wide screens.
 - Use sentence case and direct Chinese wording. Avoid decorative English headings when a clear Chinese label is available.
+- Presentation readability: body and control text should normally be 14px or larger; metadata and labels should not drop below 11px. Reserve smaller type only for nonessential decorative numbering.
 
 ## Layout
 

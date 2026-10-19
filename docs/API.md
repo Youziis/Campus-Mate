@@ -1,5 +1,10 @@
 # Campus Mate API 接口文档
 
+## 自定义兴趣标签
+
+个人资料 PATCH /api/users/me、活动 POST /api/activities 与 PATCH /api/activities/:id 的 interests 字段接受字符串数组或空白分隔的字符串。例：`{"interests":"羽毛球 摄影 奶龙打卡"}`。保存时自动拆分、去空项、去重；新名称写入 interests 表，已有名称复用，并更新 user_interests 或 activity_interests 关联。最多 30 个标签，每个最多 30 个字符。非法输入返回 400；不传字段则不修改，空数组或空字符串则清空关联。
+
+
 面向前端开发与联调。文档按当前 `server/index.js` 实现整理；接口变更后请同步更新本文档。
 
 ## 1. 基本约定
@@ -140,6 +145,28 @@
 
 ## 3. 兴趣与用户资料
 
+### 3.0 `GET /api/categories` — 获取活动种类
+
+**权限：** 无需登录。
+
+**参数：** 无。
+
+**返回结果（200）：** 按 `sort_order` 排序的活动种类数组。每项包含 `id`、`name`、`cover`、`icon` 和 `sort_order`。`cover` 是活动未上传图片时使用的默认封面路径。
+
+```json
+[
+  {
+    "id": 1,
+    "name": "运动",
+    "cover": "/covers/sport.svg",
+    "icon": "🏃",
+    "sort_order": 10
+  }
+]
+```
+
+**报错代码：** 无业务报错。
+
 ### 3.1 `GET /api/interests` — 获取兴趣标签
 
 **权限：** 公开
@@ -172,7 +199,7 @@
 | `interests`                                        | string[] | 传入数组时整体替换兴趣标签     |
 | `availability`                                     | object[] | 传入数组时整体替换每周空闲时间 |
 
-`availability` 项格式：`{ "weekday": 6, "period": "下午" }`。`weekday` 为 `0` 至 `6`（周日到周六）；`period` 当前使用“上午”“下午”“晚上”。不传 `interests` 或 `availability` 时，不修改对应数据。
+`availability` 项格式：`{ "weekday": 6, "period": "5-6" }`。`weekday` 为 `0` 至 `6`（周日到周六）；`period` 使用课程节次或晚间时段：`1-2`、`3-4`、`5-6`、`7-8`、`19:00-21:00`、`21:00-23:00`。不传 `interests` 或 `availability` 时，不修改对应数据。
 
 示例：
 
@@ -181,7 +208,7 @@
   "name": "林同学",
   "bio": "喜欢徒步和摄影",
   "interests": ["徒步", "摄影"],
-  "availability": [{ "weekday": 6, "period": "下午" }]
+  "availability": [{ "weekday": 6, "period": "5-6" }]
 }
 ```
 
@@ -195,7 +222,7 @@
 
 **参数：** Header：Bearer Token。
 
-**返回结果（200）：** `[{ "weekday": 6, "period": "下午" }]`。
+**返回结果（200）：** `[{ "weekday": 6, "period": "5-6" }]`。
 
 **报错代码：** `401` 未登录。
 
@@ -520,9 +547,9 @@
 
 **报错代码：** `401` 未登录；`403` 非管理员。当前实现对不存在的活动 ID 也返回成功。
 
-### 7.6 `POST /api/uploads` — 上传活动图片
+### 7.6 `POST /api/uploads` — 上传图片
 
-**权限：** 登录
+**权限：** 登录。活动封面和用户头像共用此上传接口；上传头像后通过 `PATCH /api/users/me` 将返回的 `url` 写入 `avatar`。
 
 **参数：** Header：Bearer Token；Body 类型：`multipart/form-data`；文件字段名：`image`。
 

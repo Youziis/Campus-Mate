@@ -1,0 +1,130 @@
+.applicant-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--cm-line);
+}
+
+.applicant-info {
+  flex: 1;
+}
+
+.applicant-info b,
+.applicant-info small {
+  display: block;
+}
+
+.applicant-info b {
+  font-size: 12px;
+}
+
+.applicant-info small,
+.applicant-info p {
+  margin: 4px 0;
+  color: var(--cm-ink-muted);
+  font-size: 9px;
+}
+
+.dialog-heading {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.dialog-heading .eyebrow {
+  justify-content: center;
+}
+
+.dialog-heading h2 {
+  margin: 10px 0 6px;
+  color: var(--cm-ink);
+  font-size: 26px;
+  letter-spacing: -1px;
+}
+
+.dialog-heading p,
+.switch-auth,
+.demo-tip,
+.dialog-intro {
+  color: var(--cm-ink-muted);
+  font-size: 11px;
+}
+
+.full-btn {
+  width: 100%;
+}
+
+.switch-auth {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.switch-auth button {
+  padding: 0;
+  color: var(--cm-brand);
+  border: 0;
+  background: transparent;
+}
+
+.demo-tip,
+.dialog-intro {
+  padding: 10px;
+  background: var(--cm-surface-muted);
+  border-radius: 8px;
+}
+
+.demo-tip {
+  text-align: center;
+}
+
+.dialog-intro {
+  margin-bottom: 18px;
+}
+
+.activity-dialog .el-select,
+.activity-dialog .el-date-editor,
+.activity-dialog .el-input-number {
+  width: 100%;
+}
+
+.upload-box {
+  display: flex;
+  width: 100%;
+  min-height: 84px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  color: var(--cm-ink-muted);
+  font-size: 10px;
+  border: 1px dashed #aebdb3;
+  background: #fafaf6;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.upload-box img {
+  width: 100px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 7px;
+}
+
+.el-dialog {
+  overflow: hidden;
+  border: 1px solid rgba(32, 51, 47, 0.1);
+  border-radius: 18px;
+}
+
+.el-dialog__title {
+  color: var(--cm-ink);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+
+  .el-dialog {
+    width: calc(100% - 24px) !important;
+    margin-top: 5vh;
+  }
+}

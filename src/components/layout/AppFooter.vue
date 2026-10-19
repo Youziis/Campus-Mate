@@ -4,3 +4,5 @@
     <span>让校园生活，多一个同行的人。</span><span>© 2026 Campus Mate</span>
   </footer>
 </template>
+
+<style src="../../styles/components/app-footer.css"></style>

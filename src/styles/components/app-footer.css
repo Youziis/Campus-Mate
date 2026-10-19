@@ -1,0 +1,17 @@
+.footer-brand {
+  cursor: default;
+}
+
+.footer-brand .brand-mark {
+  width: 29px;
+  height: 29px;
+  border-radius: 9px 9px 9px 3px;
+}
+
+.footer-brand .brand-mark i {
+  width: 13px;
+  height: 3px;
+}
+
+.footer-brand .brand-mark i:nth-child(1) { transform: translateY(-5px) rotate(-8deg); }
+.footer-brand .brand-mark i:nth-child(3) { transform: translateY(5px) rotate(8deg); }

@@ -1,0 +1,118 @@
+/* This route must render correctly before the discovery route's CSS is loaded. */
+.my-activities-page .activity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  align-items: start;
+  gap: 22px;
+}
+
+.my-activities-page .activity-grid > .activity-card {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  grid-column: auto;
+}
+
+.my-activities-page .activity-grid .inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.my-activities-page .activity-grid .inline-actions .el-button + .el-button {
+  margin-left: 0;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 30px 0 38px;
+}
+
+.stats-row > div {
+  position: relative;
+  padding: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(32, 51, 47, 0.08);
+  background: var(--cm-surface);
+  border-radius: 15px;
+  will-change: transform;
+}
+
+.stats-row > div::after {
+  position: absolute;
+  right: -18px;
+  bottom: -34px;
+  width: 82px;
+  height: 82px;
+  content: "";
+  background: var(--cm-surface-muted);
+  border-radius: 50%;
+}
+
+.stats-row b,
+.stats-row span {
+  display: block;
+}
+
+.stats-row b {
+  color: var(--cm-brand);
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-row span {
+  margin-top: 7px;
+  color: var(--cm-ink-muted);
+  font-size: 11px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--cm-line);
+}
+
+.tabs button.selected {
+  color: var(--cm-brand);
+  font-weight: 700;
+  background: var(--cm-surface-muted);
+}
+
+.pending {
+  display: inline-grid;
+  min-width: 17px;
+  height: 17px;
+  margin-left: 3px;
+  place-items: center;
+  color: white;
+  font-size: 9px;
+  background: var(--cm-accent);
+  border-radius: 50%;
+}
+
+@media (max-width: 900px) {
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+
+  .stats-row {
+    gap: 8px;
+  }
+
+  .stats-row > div {
+    padding: 18px;
+  }
+
+  .stats-row b {
+    font-size: 23px;
+  }
+
+}

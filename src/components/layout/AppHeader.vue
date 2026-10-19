@@ -41,12 +41,18 @@ function openAccount() {
     </el-input>
 
     <div class="header-account">
+      <button v-if="store.token.value" class="header-my-activities" type="button" :class="{ active: route.name === 'my-activities' }" @click="router.push({ name: 'my-activities' })">
+        <span>◇</span><b>我的活动</b>
+      </button>
       <el-badge v-if="store.token.value" :is-dot="store.unreadCount.value > 0" class="account-badge">
         <button class="account-avatar" type="button" aria-label="进入个人中心" @click="openAccount">
-          {{ store.user.value?.name?.[0] }}
+          <img v-if="store.user.value?.avatar" :src="store.user.value.avatar" alt="" />
+          <span v-else>{{ store.user.value?.name?.[0] }}</span>
         </button>
       </el-badge>
       <button v-else class="login-entry" type="button" @click="openAccount">登录</button>
     </div>
   </header>
 </template>
+
+<style src="../../styles/components/app-header.css"></style>

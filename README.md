@@ -38,6 +38,7 @@ npm run dev
 | `POST /api/auth/register`、`POST /api/auth/login`                                                 | 公开                           | 注册、登录                                       |
 | `GET /api/auth/me`                                                                                | 登录                           | 当前用户                                         |
 | `GET /api/interests`                                                                              | 公开                           | 兴趣标签                                         |
+| `GET /api/categories`                                                                             | 公开                           | 活动种类、图标、排序和默认封面                   |
 | `GET/PATCH /api/users/:id`、`PATCH /api/users/me`                                                 | 登录                           | 公开资料、更新本人资料                           |
 | `GET /api/users/me/availability`、`GET /api/users/me/stats`                                       | 登录                           | 空闲时间、统计                                   |
 | `GET/POST /api/activities`                                                                        | 查询公开、创建需登录           | 活动列表与发布；支持关键词、分类、日期、兴趣筛选 |
@@ -53,17 +54,17 @@ npm run dev
 | `GET /api/notifications`、`PATCH /api/notifications/:id/read`、`POST /api/notifications/read-all` | 登录                           | 站内通知                                         |
 | `POST /api/reports`                                                                               | 登录                           | 举报                                             |
 | `GET /api/admin/reports`、`PATCH /api/admin/reports/:id`、`GET/DELETE /api/admin/activities/:id`  | 管理员                         | 举报和活动管理                                   |
-| `POST /api/uploads`                                                                               | 登录                           | 上传 JPG/PNG/WebP 图片，最大 5 MB                |
+| `POST /api/uploads`                                                                               | 登录                           | 上传活动封面或头像，支持 JPG/PNG/WebP，最大 5 MB |
 
 ## 数据表与验证
 
-自动建表共 13 张：`users`、`interests`、`user_interests`、`availability`、`activities`、`activity_interests`、`applications`、`favorites`、`notifications`、`reports`、`reviews`、`uploads`、`admin_actions`。
+自动建表共 14 张：`users`、`interests`、`user_interests`、`availability`、`activity_categories`、`activities`、`activity_interests`、`applications`、`favorites`、`notifications`、`reports`、`reviews`、`uploads`、`admin_actions`。活动种类表保存默认封面、图标、排序和启用状态。
 
 ### 接口和数据库代码位置
 
 - `server/index.js`：Express 接口路由。认证和权限中间件位于文件顶部，路由按认证、用户、活动、报名、评价、通知和管理功能分组。
 - `server/db.js`：SQLite 文件位置、连接设置和 13 张表的结构。新增字段时请注意，`CREATE TABLE IF NOT EXISTS` 不会给已有数据库自动加列；需要配套数据库迁移。
-- `server/seed.js`：兴趣标签、演示账号和示例活动。种子账号用 `INSERT OR IGNORE`，重复执行不会覆盖已存在用户的密码。
+- `server/seed.js`：兴趣标签、演示账号和 50 条推荐活动。演示活动会在重复执行时刷新到未来日期，不会重复插入；种子账号使用 `INSERT OR IGNORE`，不会覆盖已有用户密码。
 - `src/App.vue`：前端页面状态、交互处理和 API 请求调用。
 
 数据库默认路径为 `server/data/campus-mate.db`，也可以通过 `.env` 中的 `DATABASE_FILE` 指定其他位置。
