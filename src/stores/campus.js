@@ -189,6 +189,14 @@ async function loadActivity(id) {
   loading.value = true;
   try {
     selected.value = await api(`/activities/${id}`);
+    if (token.value && selected.value?.creator_id !== user.value?.id) {
+      const joined = await api("/users/me/applications").catch(() => []);
+      const record = joined.find((item) => Number(item.id) === Number(id));
+      if (record) {
+        selected.value.application_status = record.status;
+        selected.value.is_member = record.status === "approved";
+      }
+    }
     reviews.value = await api(`/users/${selected.value.creator_id}/reviews`).catch(() => []);
   } catch (error) {
     selected.value = null;
@@ -404,6 +412,7 @@ async function reviewMember(activityId, reviewee) {
 }
 
 async function showMembers() {
+  if (selected.value?.creator_id === user.value?.id) return openApplicants(selected.value);
   try {
     const data = await api(`/activities/${selected.value.id}/contact`);
     const text = data.members.length
@@ -412,6 +421,13 @@ async function showMembers() {
     await ElMessageBox.alert(text, "活动成员联系方式", { confirmButtonText: "知道了", customClass: "member-contact-dialog" });
   }
   catch (error) { showError(error); }
+}
+
+async function copyOrganizerContact() {
+  const contact = selected.value?.creator_contact;
+  if (!contact) return ElMessage.warning("发起人未填写联系方式");
+  try { await navigator.clipboard.writeText(contact); ElMessage.success("发起人联系方式已复制"); }
+  catch { ElMessage.error("复制失败，请手动记录联系方式"); }
 }
 
 const campus = {
@@ -423,7 +439,7 @@ const campus = {
   join, newActivity, editActivity, saveActivity, loadMine, loadFavorites, loadProfile,
   loadAdmin, openApplicants, reviewApp, withdraw, cancel, toggleAvailability,
   saveProfile, markRead, markAllRead, report, recommend, uploadImage, uploadAvatar, reportAction,
-  adminRemove, reviewMember, showMembers,
+  adminRemove, reviewMember, showMembers, copyOrganizerContact,
 };
 
 export function useCampus() {

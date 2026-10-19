@@ -46,9 +46,9 @@ const userSafe = (u) => {
 function activity(id, viewer) {
   const a = db
     .prepare(
-      `SELECT a.*,COALESCE(c.name,a.category) category,c.cover category_cover,c.icon category_icon,u.name creator_name,u.avatar creator_avatar,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='approved') member_count,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='pending') pending_count,EXISTS(SELECT 1 FROM favorites f WHERE f.activity_id=a.id AND f.user_id=?) is_favorite FROM activities a LEFT JOIN activity_categories c ON c.id=a.category_id JOIN users u ON u.id=a.creator_id WHERE a.id=?`,
+      `SELECT a.*,COALESCE(c.name,a.category) category,c.cover category_cover,c.icon category_icon,u.name creator_name,u.avatar creator_avatar,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='approved') member_count,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='pending') pending_count,EXISTS(SELECT 1 FROM favorites f WHERE f.activity_id=a.id AND f.user_id=?) is_favorite,(SELECT x.status FROM applications x WHERE x.activity_id=a.id AND x.user_id=? ORDER BY x.created_at DESC LIMIT 1) application_status FROM activities a LEFT JOIN activity_categories c ON c.id=a.category_id JOIN users u ON u.id=a.creator_id WHERE a.id=?`,
     )
-    .get(viewer || 0, id);
+    .get(viewer || 0, viewer || 0, id);
   if (a) {
     a.interests = db
       .prepare(
@@ -62,6 +62,9 @@ function activity(id, viewer) {
         "SELECT 1 FROM applications WHERE activity_id=? AND user_id=? AND status='approved'",
       )
       .get(id, viewer || 0);
+    if (a.is_member || a.creator_id === viewer) {
+      a.creator_contact = db.prepare("SELECT contact FROM users WHERE id=?").get(a.creator_id)?.contact || "";
+    }
   }
   return a;
 }
@@ -229,7 +232,7 @@ app.get("/api/activities", (req, res) => {
       .map((x) => activity(x.id, req.user?.id)),
   );
 });
-app.get("/api/activities/:id", (req, res) => {
+app.get("/api/activities/:id", auth, (req, res) => {
   const a = activity(req.params.id, req.user?.id);
   a ? res.json(a) : res.sendStatus(404);
 });
@@ -375,7 +378,7 @@ app.get("/api/activities/:id/applications", auth, (req, res) => {
   res.json(
     db
       .prepare(
-        "SELECT x.*,u.name,u.avatar,u.major,u.year FROM applications x JOIN users u ON u.id=x.user_id WHERE x.activity_id=? ORDER BY x.created_at DESC",
+        "SELECT x.*,u.name,u.avatar,u.major,u.year,u.contact FROM applications x JOIN users u ON u.id=x.user_id JOIN activities a ON a.id=x.activity_id WHERE x.activity_id=? AND x.user_id<>a.creator_id ORDER BY x.created_at DESC",
       )
       .all(a.id),
   );
@@ -440,9 +443,9 @@ app.get("/api/users/me/applications", auth, (req, res) =>
   res.json(
     db
       .prepare(
-        "SELECT a.id,a.creator_id,a.title,a.starts_at,a.location,x.status,x.id application_id FROM applications x JOIN activities a ON a.id=x.activity_id WHERE x.user_id=? ORDER BY a.starts_at",
+        "SELECT a.id,a.creator_id,a.title,a.starts_at,a.location,x.status,x.id application_id FROM applications x JOIN activities a ON a.id=x.activity_id WHERE x.user_id=? AND a.creator_id<>? ORDER BY a.starts_at",
       )
-      .all(req.user.id)
+      .all(req.user.id, req.user.id)
       .map((row) => {
         const details = activity(row.id, req.user.id);
         return { ...details, ...row, activity_status: details.status };
@@ -491,7 +494,7 @@ app.get("/api/activities/:id/contact", auth, (req, res) => {
   res.json({
     members: db
       .prepare(
-        "SELECT u.id,u.name,u.avatar,u.major,u.contact,x.status FROM applications x JOIN users u ON u.id=x.user_id WHERE x.activity_id=? AND x.status='approved'",
+        "SELECT u.id,u.name,u.avatar,u.major,u.contact,x.status FROM applications x JOIN users u ON u.id=x.user_id JOIN activities a ON a.id=x.activity_id WHERE x.activity_id=? AND x.status='approved' AND x.user_id<>a.creator_id",
       )
       .all(req.params.id),
   });
