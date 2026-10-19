@@ -14,7 +14,7 @@ npm run dev
 
 打开 <http://localhost:5173/>。API 默认运行在端口 3002，Vite 会自动代理 API 和图片请求。若端口冲突，可修改 `.env` 中的 `PORT`，并同步修改 `vite.config.js` 中的代理端口。
 
-演示账号：`alice@campus.test / mate1234`、`bo@campus.test / mate1234`、`mei@campus.test / mate1234`；管理员：`admin@campus.test / admin123`。
+演示账号：`alice@campus.test / mate1234`、`bo@campus.test / mate1234`、`mei@campus.test / mate1234`；管理员：`admin@campus.test / admin123`。图片活动用户：`chenxi@campus.test`、`linan@campus.test`、`yueyue@campus.test`、`shiyu@campus.test`、`haoran@campus.test`、`qinghe@campus.test`，初始密码均为 `12345678`。
 
 请勿在公开部署时使用演示账号或默认 JWT 密钥。复制 `.env.example` 为 `.env` 并设置随机 `JWT_SECRET`。数据库默认写入 `server/data/campus-mate.db`，上传图片位于 `server/uploads/`。
 
