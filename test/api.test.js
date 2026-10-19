@@ -123,6 +123,20 @@ test("core campus activity flow respects login, approval, privacy and admin acce
     assert.deepEqual((await edited.json()).interests, ["自定义编辑标签"]);
     assert.equal((await updateTags([])).status, 200);
     assert.deepEqual((await (await call(`/users/${self.id}`, alice)).json()).interests, []);
+    // Cancellation preserves ownership checks and notifies approved members once.
+    assert.equal((await call(`/activities/${a.id}`, alice, { method: "DELETE" })).status, 403);
+    const beforeCancellation = await (await call("/notifications", mei)).json();
+    assert.equal((await call(`/activities/${a.id}`, bo, { method: "DELETE" })).status, 400);
+    assert.equal((await call(`/activities/${a.id}`, mei)).status, 200);
+    const cancelled = await call(`/activities/${a.id}`, bo, { method: "DELETE", body: JSON.stringify({ reason: "场馆临时关闭", announcement: "本次取消，请勿前往集合点。" }) });
+    assert.equal(cancelled.status, 200, await cancelled.text());
+    assert.equal((await call(`/activities/${a.id}`, mei)).status, 404);
+    assert.ok(!(await (await call("/users/me/applications", mei)).json()).some((item) => item.id === a.id));
+    const afterCancellation = await (await call("/notifications", mei)).json();
+    assert.equal(afterCancellation.length, beforeCancellation.length + 1);
+    assert.ok(afterCancellation.some((item) => item.title === "活动已取消" && item.body.includes(a.title) && item.body.includes("场馆临时关闭") && item.body.includes("请勿前往集合点")));
+    assert.equal((await call(`/activities/${a.id}`, bo, { method: "DELETE" })).status, 404);
+    assert.equal((await (await call("/notifications", mei)).json()).length, afterCancellation.length);
     console.log(
       "Core API flow verified: health, login, activity list, application approval, contact privacy, favorites, notifications, stats and admin guard.",
     );

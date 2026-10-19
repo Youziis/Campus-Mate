@@ -1,5 +1,13 @@
 # Campus Mate frontend redesign plan
 
+## Activity cancellation form
+
+The hosted activity card's cancel action now opens CancellationDialog. It requires
+a reason and announcement before DELETE /api/activities/:id. Submission is locked
+while pending; failures retain inputs, success refreshes hosted/joined lists and
+removes the deleted activity from local favorites. The backend sends durable
+notifications and deletes the activity atomically. Build and API regression pass.
+
 ## Unified activity member information
 
 Activity details retain GET /api/activities/:id. Organizers load applications

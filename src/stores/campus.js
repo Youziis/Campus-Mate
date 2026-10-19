@@ -24,6 +24,10 @@ const loading = ref(true);
 const loadError = ref("");
 const activityDialogOpen = ref(false);
 const applicantsOpen = ref(false);
+const cancellationOpen = ref(false);
+const cancellationTarget = ref(null);
+const cancellationBusy = ref(false);
+const cancellationForm = ref({ reason: "", announcement: "" });
 const editing = ref(false);
 const applications = ref([]);
 const memberOrganizer = ref(null);
@@ -315,11 +319,26 @@ async function withdraw(activity) {
 }
 
 async function cancel(activity) {
+  cancellationTarget.value = activity;
+  cancellationForm.value = { reason: "", announcement: "" };
+  cancellationOpen.value = true;
+}
+
+async function submitCancellation() {
+  if (cancellationBusy.value) return;
+  const { reason, announcement } = cancellationForm.value;
+  if (!reason.trim() || !announcement.trim()) return ElMessage.warning("请填写取消原因和公告内容");
+  cancellationBusy.value = true;
   try {
-    await ElMessageBox.confirm("活动将标记为取消，成员会收到通知。", "取消活动");
-    await api(`/activities/${activity.id}`, { method: "DELETE" });
+    const id = cancellationTarget.value.id;
+    await api(`/activities/${id}`, { method: "DELETE", body: JSON.stringify({ reason, announcement }) });
+    cancellationOpen.value = false;
+    favoriteList.value = favoriteList.value.filter((item) => item.id !== id);
+    if (selected.value?.id === id) selected.value = null;
     await Promise.all([load(), loadMine()]);
-  } catch (error) { if (error !== "cancel") showError(error); }
+    ElMessage.success("活动已删除，取消通知已发送");
+  } catch (error) { showError(error); }
+  finally { cancellationBusy.value = false; }
 }
 
 function toggleAvailability(weekday, period) {
@@ -432,6 +451,7 @@ async function copyOrganizerContact() {
 }
 
 const campus = {
+  cancellationOpen, cancellationTarget, cancellationForm, cancellationBusy, submitCancellation,
   token, user, activities, interests, categories, notifications, stats, selected, query, category,
   showAuth, authMode, busy, avatarUploading, loading, loadError, activityDialogOpen, applicantsOpen,
   editing, form, applications, memberOrganizer, myApplications, myActivities, favoriteList, reports,

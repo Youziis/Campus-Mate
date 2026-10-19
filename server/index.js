@@ -329,12 +329,27 @@ app.delete("/api/activities/:id", auth, (req, res) => {
   if (!a) return res.sendStatus(404);
   if (a.creator_id !== req.user.id && req.user.role !== "admin")
     return res.sendStatus(403);
-  db.prepare('UPDATE activities SET status="cancelled" WHERE id=?').run(a.id);
-  db.prepare(
-    'SELECT user_id FROM applications WHERE activity_id=? AND status="approved"',
-  )
-    .all(a.id)
-    .forEach((x) => notify(x.user_id, "活动已取消", a.title));
+  const { reason, announcement } = req.body || {};
+  if (typeof reason !== "string" || !reason.trim() || reason.trim().length > 300 ||
+      typeof announcement !== "string" || !announcement.trim() || announcement.trim().length > 1000) {
+    return res.status(400).json({ error: "请填写取消原因（最多300字）和公告内容（最多1000字）" });
+  }
+  // 通知不依赖活动外键，删除活动后仍可查看完整取消说明。
+  db.exec("SAVEPOINT cancel_activity");
+  try {
+    db.prepare(
+      "SELECT DISTINCT user_id FROM applications WHERE activity_id=? AND status IN ('approved','pending') AND user_id<>?",
+    )
+      .all(a.id, a.creator_id)
+      .forEach((x) => notify(x.user_id, "活动已取消", `活动：${a.title}\n取消原因：${reason.trim()}\n公告：${announcement.trim()}`));
+    db.prepare("DELETE FROM reports WHERE target_type='activity' AND target_id=?").run(a.id);
+    db.prepare("DELETE FROM activities WHERE id=?").run(a.id);
+    db.exec("RELEASE cancel_activity");
+  } catch (error) {
+    db.exec("ROLLBACK TO cancel_activity");
+    db.exec("RELEASE cancel_activity");
+    throw error;
+  }
   res.json({ ok: true });
 });
 
