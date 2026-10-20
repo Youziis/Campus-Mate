@@ -1,5 +1,21 @@
 # Campus Mate frontend redesign plan
 
+## Authentication input focus (2026-10-20)
+
+- Scope: `AuthDialog.vue` only. Login and registration share the same scoped
+  input dimensions, rounded wrapper border, and keyboard/click focus treatment.
+- Preserve `POST /api/auth/login` and `POST /api/auth/register`, the existing
+  `{ name, email, password }` request body, JWT storage and current user refresh.
+- Preserve opening/closing the dialog, switching modes, Enter submission,
+  password visibility, pending feedback and server error handling.
+- The rounded wrapper draws the field border. The inner native input has no
+  second outline, and browser autofill uses the same field surface and radius.
+- Password autocomplete distinguishes current passwords from new passwords.
+- Verified: production build and existing API regression pass. Edge checks pass
+  for both modes at 1280px and 390px, including click/Tab focus, stable field
+  dimensions, password visibility, and the forced Chromium autofill pseudo state.
+  Real registration and login were exercised against a temporary SQLite database.
+
 ## Form focus borders
 
 Element Plus form controls use their rounded outer wrapper's inset focus border.
