@@ -1,11 +1,12 @@
 <script setup>
-import { onMounted, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { coverStyle, formatDate, iconFor, useCampus } from "../stores/campus";
 
 const route = useRoute();
 const router = useRouter();
 const store = useCampus();
+const failedAvatar = ref("");
 const loadActivity = () => store.loadActivity(route.params.id);
 const goBack = () => window.history.state.back ? router.back() : router.push({ name: "discover" });
 onMounted(loadActivity);
@@ -31,7 +32,10 @@ watch(() => route.params.id, loadActivity);
           <div><dt>人数</dt><dd>{{ store.selected.value.member_count }} / {{ store.selected.value.capacity }} 位成员</dd></div>
         </dl>
         <div class="host-detail motion-item">
-          <span class="avatar">{{ store.selected.value.creator_name?.[0] }}</span>
+          <span class="avatar detail-host-avatar">
+            <img v-if="store.selected.value.creator_avatar && failedAvatar !== store.selected.value.creator_avatar" :src="store.selected.value.creator_avatar" :alt="`${store.selected.value.creator_name || '发起人'}的头像`" @error="failedAvatar = store.selected.value.creator_avatar" />
+            <span v-else>{{ Array.from(store.selected.value.creator_name?.trim() || '友')[0] }}</span>
+          </span>
           <div><b>{{ store.selected.value.creator_name }}</b><small>活动组织者</small></div>
           <span v-if="store.selected.value.creator_id === store.user.value?.id" class="detail-role-status">你是活动发起者</span>
           <span v-else-if="store.selected.value.is_member || store.selected.value.application_status === 'approved'" class="detail-role-status approved">已通过审核</span>
