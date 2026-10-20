@@ -9,6 +9,7 @@ import fs from "node:fs";
 import { db, notify } from "./db.js";
 import { registerAi } from "./ai.js";
 import { normalizeInterests, replaceInterests } from "./interests.js";
+import { activityDate, activityIso } from "../shared/time.js";
 const app = express(),
   secret = process.env.JWT_SECRET || "campus-mate-local-demo-secret-change-me";
 
@@ -46,9 +47,9 @@ const userSafe = (u) => {
 function activity(id, viewer) {
   const a = db
     .prepare(
-      `SELECT a.*,COALESCE(c.name,a.category) category,c.cover category_cover,c.icon category_icon,u.name creator_name,u.avatar creator_avatar,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='approved') member_count,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='pending') pending_count,EXISTS(SELECT 1 FROM favorites f WHERE f.activity_id=a.id AND f.user_id=?) is_favorite FROM activities a LEFT JOIN activity_categories c ON c.id=a.category_id JOIN users u ON u.id=a.creator_id WHERE a.id=?`,
+      `SELECT a.*,COALESCE(c.name,a.category) category,c.cover category_cover,c.icon category_icon,u.name creator_name,u.avatar creator_avatar,(1 + (SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='approved' AND x.user_id<>a.creator_id)) member_count,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='pending') pending_count,EXISTS(SELECT 1 FROM favorites f WHERE f.activity_id=a.id AND f.user_id=?) is_favorite,(SELECT x.status FROM applications x WHERE x.activity_id=a.id AND x.user_id=? ORDER BY x.created_at DESC LIMIT 1) application_status FROM activities a LEFT JOIN activity_categories c ON c.id=a.category_id JOIN users u ON u.id=a.creator_id WHERE a.id=?`,
     )
-    .get(viewer || 0, id);
+    .get(viewer || 0, viewer || 0, id);
   if (a) {
     a.interests = db
       .prepare(
@@ -62,6 +63,9 @@ function activity(id, viewer) {
         "SELECT 1 FROM applications WHERE activity_id=? AND user_id=? AND status='approved'",
       )
       .get(id, viewer || 0);
+    if (a.is_member || a.creator_id === viewer) {
+      a.creator_contact = db.prepare("SELECT contact FROM users WHERE id=?").get(a.creator_id)?.contact || "";
+    }
   }
   return a;
 }
@@ -120,6 +124,9 @@ app.get("/api/users/:id", auth, (req, res) => {
       .get(req.params.id),
   );
   if (!u) return res.sendStatus(404);
+  if (Number(req.params.id) === req.user.id) {
+    u.contact = db.prepare("SELECT contact FROM users WHERE id=?").get(req.user.id)?.contact || "";
+  }
   u.interests = db
     .prepare(
       "SELECT i.name FROM interests i JOIN user_interests x ON x.interest_id=i.id WHERE x.user_id=?",
@@ -133,7 +140,7 @@ app.get("/api/users/:id", auth, (req, res) => {
 });
 app.patch("/api/users/me", auth, (req, res) => {
   const tags = req.body.interests === undefined ? null : normalizeInterests(req.body.interests);
-  const fields = ["name", "bio", "campus", "major", "year", "avatar"];
+  const fields = ["name", "bio", "campus", "major", "year", "avatar", "contact"];
   const updates = fields.filter((k) => req.body[k] !== undefined);
   if (updates.length)
     db.prepare(
@@ -207,7 +214,7 @@ app.get("/api/activities", (req, res) => {
     args.push(category);
   }
   if (date) {
-    sql += " AND date(a.starts_at)=date(?)";
+    sql += " AND date(a.starts_at,'+8 hours')=date(?)";
     args.push(date);
   }
   if (interest) {
@@ -217,7 +224,7 @@ app.get("/api/activities", (req, res) => {
   }
   sql +=
     sort === "popular"
-      ? ' ORDER BY (SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status="approved") DESC'
+      ? " ORDER BY (1 + (SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='approved' AND x.user_id<>a.creator_id)) DESC"
       : " ORDER BY a.starts_at ASC";
   res.json(
     db
@@ -226,7 +233,7 @@ app.get("/api/activities", (req, res) => {
       .map((x) => activity(x.id, req.user?.id)),
   );
 });
-app.get("/api/activities/:id", (req, res) => {
+app.get("/api/activities/:id", auth, (req, res) => {
   const a = activity(req.params.id, req.user?.id);
   a ? res.json(a) : res.sendStatus(404);
 });
@@ -248,7 +255,8 @@ app.post("/api/activities", auth, (req, res) => {
     !category ||
     !location ||
     !starts_at ||
-    new Date(starts_at) <= new Date()
+    !Number.isFinite(activityDate(starts_at).getTime()) ||
+    activityDate(starts_at) <= new Date()
   )
     return res.status(400).json({ error: "请填写完整信息并选择未来时间" });
   const categoryRecord = db
@@ -267,8 +275,8 @@ app.post("/api/activities", auth, (req, res) => {
       categoryRecord.name,
       categoryRecord.id,
       location,
-      starts_at,
-      ends_at || null,
+      activityIso(starts_at),
+      ends_at ? activityIso(ends_at) : null,
       Math.max(2, Number(capacity) || 6),
       req.body.image || null,
     );
@@ -297,6 +305,8 @@ app.patch("/api/activities/:id", auth, (req, res) => {
     "status",
   ];
   const set = keys.filter((k) => req.body[k] !== undefined);
+  if (req.body.starts_at !== undefined) req.body.starts_at = activityIso(req.body.starts_at);
+  if (req.body.ends_at !== undefined) req.body.ends_at = req.body.ends_at ? activityIso(req.body.ends_at) : null;
   if (req.body.category !== undefined) {
     const categoryRecord = db
       .prepare("SELECT id,name FROM activity_categories WHERE name=? AND enabled=1")
@@ -323,12 +333,27 @@ app.delete("/api/activities/:id", auth, (req, res) => {
   if (!a) return res.sendStatus(404);
   if (a.creator_id !== req.user.id && req.user.role !== "admin")
     return res.sendStatus(403);
-  db.prepare('UPDATE activities SET status="cancelled" WHERE id=?').run(a.id);
-  db.prepare(
-    'SELECT user_id FROM applications WHERE activity_id=? AND status="approved"',
-  )
-    .all(a.id)
-    .forEach((x) => notify(x.user_id, "活动已取消", a.title));
+  const { reason, announcement } = req.body || {};
+  if (typeof reason !== "string" || !reason.trim() || reason.trim().length > 300 ||
+      typeof announcement !== "string" || !announcement.trim() || announcement.trim().length > 1000) {
+    return res.status(400).json({ error: "请填写取消原因（最多300字）和公告内容（最多1000字）" });
+  }
+  // 通知不依赖活动外键，删除活动后仍可查看完整取消说明。
+  db.exec("SAVEPOINT cancel_activity");
+  try {
+    db.prepare(
+      "SELECT DISTINCT user_id FROM applications WHERE activity_id=? AND status IN ('approved','pending') AND user_id<>?",
+    )
+      .all(a.id, a.creator_id)
+      .forEach((x) => notify(x.user_id, "活动已取消", `活动：${a.title}\n取消原因：${reason.trim()}\n公告：${announcement.trim()}`));
+    db.prepare("DELETE FROM reports WHERE target_type='activity' AND target_id=?").run(a.id);
+    db.prepare("DELETE FROM activities WHERE id=?").run(a.id);
+    db.exec("RELEASE cancel_activity");
+  } catch (error) {
+    db.exec("ROLLBACK TO cancel_activity");
+    db.exec("RELEASE cancel_activity");
+    throw error;
+  }
   res.json({ ok: true });
 });
 
@@ -343,9 +368,9 @@ app.post("/api/activities/:id/applications", auth, (req, res) => {
     return res.status(400).json({ error: "不能报名自己的活动" });
   const count = db
     .prepare(
-      "SELECT count(*) n FROM applications WHERE activity_id=? AND status='approved'",
+      "SELECT 1 + count(*) n FROM applications WHERE activity_id=? AND status='approved' AND user_id<>?",
     )
-    .get(a.id).n;
+    .get(a.id, a.creator_id).n;
   if (count >= a.capacity)
     return res.status(409).json({ error: "活动名额已满" });
   try {
@@ -372,7 +397,7 @@ app.get("/api/activities/:id/applications", auth, (req, res) => {
   res.json(
     db
       .prepare(
-        "SELECT x.*,u.name,u.avatar,u.major,u.year FROM applications x JOIN users u ON u.id=x.user_id WHERE x.activity_id=? ORDER BY x.created_at DESC",
+        "SELECT x.*,u.name,u.avatar,u.major,u.year,u.contact FROM applications x JOIN users u ON u.id=x.user_id JOIN activities a ON a.id=x.activity_id WHERE x.activity_id=? AND x.user_id<>a.creator_id ORDER BY x.created_at DESC",
       )
       .all(a.id),
   );
@@ -392,9 +417,9 @@ app.patch("/api/applications/:id", auth, (req, res) => {
     req.body.status === "approved" &&
     db
       .prepare(
-        "SELECT count(*) n FROM applications WHERE activity_id=? AND status='approved'",
+        "SELECT 1 + count(*) n FROM applications WHERE activity_id=? AND status='approved' AND user_id<>?",
       )
-      .get(x.activity_id).n >= x.capacity
+      .get(x.activity_id, x.creator_id).n >= x.capacity
   )
     return res.status(409).json({ error: "名额已满" });
   db.prepare("UPDATE applications SET status=? WHERE id=?").run(
@@ -437,9 +462,9 @@ app.get("/api/users/me/applications", auth, (req, res) =>
   res.json(
     db
       .prepare(
-        "SELECT a.id,a.creator_id,a.title,a.starts_at,a.location,x.status,x.id application_id FROM applications x JOIN activities a ON a.id=x.activity_id WHERE x.user_id=? ORDER BY a.starts_at",
+        "SELECT a.id,a.creator_id,a.title,a.starts_at,a.location,x.status,x.id application_id FROM applications x JOIN activities a ON a.id=x.activity_id WHERE x.user_id=? AND a.creator_id<>? ORDER BY a.starts_at",
       )
-      .all(req.user.id)
+      .all(req.user.id, req.user.id)
       .map((row) => {
         const details = activity(row.id, req.user.id);
         return { ...details, ...row, activity_status: details.status };
@@ -486,9 +511,12 @@ app.get("/api/activities/:id/contact", auth, (req, res) => {
       .status(403)
       .json({ error: "仅活动组织者和已通过成员可查看联系信息" });
   res.json({
+    organizer: db
+      .prepare("SELECT id,name,avatar,major,year,contact FROM users WHERE id=?")
+      .get(a.creator_id),
     members: db
       .prepare(
-        "SELECT u.id,u.name,u.avatar,u.major,x.status FROM applications x JOIN users u ON u.id=x.user_id WHERE x.activity_id=? AND x.status='approved'",
+        "SELECT u.id,u.name,u.avatar,u.major,u.contact,x.status FROM applications x JOIN users u ON u.id=x.user_id JOIN activities a ON a.id=x.activity_id WHERE x.activity_id=? AND x.status='approved' AND x.user_id<>a.creator_id",
       )
       .all(req.params.id),
   });
@@ -561,9 +589,9 @@ app.get("/api/recommendations", auth, (req, res) => {
     .map((item) => {
       const itemNames = new Set(item.interests || []);
       const sharedInterests = [...itemNames].filter((name) => ownNames.has(name)).length;
-      const start = new Date(item.starts_at);
-      const weekday = start.getDay();
-      const hour = start.getHours() + start.getMinutes() / 60;
+      const start = new Date(activityDate(item.starts_at).getTime() + 8 * 3600000);
+      const weekday = start.getUTCDay();
+      const hour = start.getUTCHours() + start.getUTCMinutes() / 60;
       const period = hour >= 8.2 && hour < 9.95 ? "1-2"
         : hour >= 10.25 && hour < 11.84 ? "3-4"
           : hour >= 14.33 && hour < 15.92 ? "5-6"
@@ -596,6 +624,12 @@ app.patch("/api/notifications/:id/read", auth, (req, res) => {
     req.params.id,
     req.user.id,
   );
+  res.json({ ok: true });
+});
+app.delete("/api/notifications/:id", auth, (req, res) => {
+  const result = db.prepare("DELETE FROM notifications WHERE id=? AND user_id=?")
+    .run(req.params.id, req.user.id);
+  if (!result.changes) return res.status(404).json({ error: "通知不存在" });
   res.json({ ok: true });
 });
 app.post("/api/notifications/read-all", auth, (req, res) => {

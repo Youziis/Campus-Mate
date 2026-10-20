@@ -2,6 +2,7 @@ node_modules/
 dist/
 .npm-cache/
 .env
-server/data/*.db*
-server/uploads/*
-!server/uploads/.gitkeep
+# 运行库、WAL/SHM 和个人备份仅供本地使用，完整共享快照加入 Git。
+server/data/*
+!server/data/campus-mate.snapshot.db
+!server/data/.gitkeep

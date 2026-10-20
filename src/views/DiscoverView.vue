@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
 import ActivityCard from "../components/ActivityCard.vue";
@@ -10,6 +10,14 @@ gsap.registerPlugin(Flip);
 const store = useCampus();
 const flipBox = ref(null);
 const selected = ref("全部");
+let filterAnimation;
+
+function finishFilterAnimation() {
+  filterAnimation?.progress(1).kill();
+  filterAnimation = null;
+  if (flipBox.value) flipBox.value.style.minHeight = "";
+}
+onBeforeUnmount(finishFilterAnimation);
 
 const visibleCount = computed(() =>
   selected.value === "全部"
@@ -27,6 +35,7 @@ function syncVisibility() {
 }
 
 function applyFlip() {
+  finishFilterAnimation();
   const box = flipBox.value;
   if (!box) return;
   const items = [...box.querySelectorAll(".flip-item")];
@@ -37,7 +46,7 @@ function applyFlip() {
   syncVisibility();
   if (!state) return;
   box.style.minHeight = `${lockedHeight}px`;
-  Flip.from(state, {
+  filterAnimation = Flip.from(state, {
     duration: 0.7,
     scale: true,
     ease: "power1.inOut",

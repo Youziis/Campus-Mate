@@ -198,3 +198,6 @@
 .heart.hearted { color:var(--cm-accent); }
 .date-line { font-size:13px; }
 .host, .member-count { font-size:12px; }
+.card-host-avatar { overflow: hidden; }
+.card-host-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+

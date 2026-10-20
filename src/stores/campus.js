@@ -1,6 +1,7 @@
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { activityDate, activityIso, beijingInput } from "../../shared/time.js";
 
 const API = "/api";
 let router;
@@ -9,6 +10,8 @@ let initializationPromise;
 const token = ref(localStorage.getItem("cm-token") || "");
 const user = ref(null);
 const activities = ref([]);
+const recommendations = ref([]);
+const recommendationLoading = ref(false);
 const interests = ref([]);
 const categories = ref([]);
 const notifications = ref([]);
@@ -24,8 +27,13 @@ const loading = ref(true);
 const loadError = ref("");
 const activityDialogOpen = ref(false);
 const applicantsOpen = ref(false);
+const cancellationOpen = ref(false);
+const cancellationTarget = ref(null);
+const cancellationBusy = ref(false);
+const cancellationForm = ref({ reason: "", announcement: "" });
 const editing = ref(false);
 const applications = ref([]);
+const memberOrganizer = ref(null);
 const myApplications = ref([]);
 const myActivities = ref([]);
 const favoriteList = ref([]);
@@ -76,7 +84,7 @@ export function formatDate(value, includeTime = false) {
   const options = includeTime
     ? { month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit" }
     : { month: "long", day: "numeric", weekday: "short" };
-  return new Date(value).toLocaleString("zh-CN", options);
+  return activityDate(value).toLocaleString("zh-CN", { ...options, timeZone: "Asia/Shanghai" });
 }
 
 export function iconFor(categoryName) {
@@ -189,6 +197,14 @@ async function loadActivity(id) {
   loading.value = true;
   try {
     selected.value = await api(`/activities/${id}`);
+    if (token.value && selected.value?.creator_id !== user.value?.id) {
+      const joined = await api("/users/me/applications").catch(() => []);
+      const record = joined.find((item) => Number(item.id) === Number(id));
+      if (record) {
+        selected.value.application_status = record.status;
+        selected.value.is_member = record.status === "approved";
+      }
+    }
     reviews.value = await api(`/users/${selected.value.creator_id}/reviews`).catch(() => []);
   } catch (error) {
     selected.value = null;
@@ -222,7 +238,7 @@ function newActivity() {
 
 function editActivity(activity) {
   editing.value = true;
-  form.value = { ...activity, starts_at: activity.starts_at?.slice(0, 16), ends_at: activity.ends_at?.slice(0, 16) };
+  form.value = { ...activity, starts_at: beijingInput(activity.starts_at), ends_at: beijingInput(activity.ends_at) };
   activityDialogOpen.value = true;
 }
 
@@ -230,8 +246,8 @@ async function saveActivity() {
   try {
     const body = {
       ...form.value,
-      starts_at: new Date(form.value.starts_at).toISOString(),
-      ends_at: form.value.ends_at ? new Date(form.value.ends_at).toISOString() : null,
+      starts_at: activityIso(form.value.starts_at),
+      ends_at: form.value.ends_at ? activityIso(form.value.ends_at) : null,
     };
     await api(editing.value ? `/activities/${form.value.id}` : "/activities", {
       method: editing.value ? "PATCH" : "POST",
@@ -283,6 +299,7 @@ async function loadAdmin() {
 
 async function openApplicants(activity) {
   selected.value = activity;
+  memberOrganizer.value = null;
   try { applications.value = await api(`/activities/${activity.id}/applications`); applicantsOpen.value = true; }
   catch (error) { showError(error); }
 }
@@ -305,11 +322,26 @@ async function withdraw(activity) {
 }
 
 async function cancel(activity) {
+  cancellationTarget.value = activity;
+  cancellationForm.value = { reason: "", announcement: "" };
+  cancellationOpen.value = true;
+}
+
+async function submitCancellation() {
+  if (cancellationBusy.value) return;
+  const { reason, announcement } = cancellationForm.value;
+  if (!reason.trim() || !announcement.trim()) return ElMessage.warning("请填写取消原因和公告内容");
+  cancellationBusy.value = true;
   try {
-    await ElMessageBox.confirm("活动将标记为取消，成员会收到通知。", "取消活动");
-    await api(`/activities/${activity.id}`, { method: "DELETE" });
+    const id = cancellationTarget.value.id;
+    await api(`/activities/${id}`, { method: "DELETE", body: JSON.stringify({ reason, announcement }) });
+    cancellationOpen.value = false;
+    favoriteList.value = favoriteList.value.filter((item) => item.id !== id);
+    if (selected.value?.id === id) selected.value = null;
     await Promise.all([load(), loadMine()]);
-  } catch (error) { if (error !== "cancel") showError(error); }
+    ElMessage.success("活动已删除，取消通知已发送");
+  } catch (error) { showError(error); }
+  finally { cancellationBusy.value = false; }
 }
 
 function toggleAvailability(weekday, period) {
@@ -320,7 +352,12 @@ function toggleAvailability(weekday, period) {
 }
 
 async function saveProfile() {
-  try { await api("/users/me", { method: "PATCH", body: JSON.stringify(profile.value) }); ElMessage.success("资料已保存"); await load(); }
+  try {
+    await api("/users/me", { method: "PATCH", body: JSON.stringify(profile.value) });
+    await load();
+    await loadProfile();
+    ElMessage.success("资料已保存");
+  }
   catch (error) { showError(error); }
 }
 
@@ -334,6 +371,20 @@ async function markAllRead() {
   catch (error) { showError(error); }
 }
 
+async function deleteNotification(notification) {
+  if (notification.deleting) return;
+  try {
+    await ElMessageBox.confirm("确定删除这条通知吗？", "删除通知", { type: "warning", confirmButtonText: "删除", cancelButtonText: "保留" });
+    if (notification.deleting) return;
+    notification.deleting = true;
+    await api(`/notifications/${notification.id}`, { method: "DELETE" });
+    notifications.value = notifications.value.filter((item) => item.id !== notification.id);
+    ElMessage.success("通知已删除");
+  } catch (error) {
+    if (error !== "cancel" && error !== "close") showError(error);
+  } finally { notification.deleting = false; }
+}
+
 async function report(activity) {
   try {
     const { value } = await ElMessageBox.prompt("请描述举报原因", "举报活动");
@@ -344,10 +395,10 @@ async function report(activity) {
 
 async function recommend(mode = "same") {
   if (!token.value) return (showAuth.value = true);
-  loading.value = true;
-  try { activities.value = await api(`/recommendations?mode=${encodeURIComponent(mode)}`); }
+  recommendationLoading.value = true;
+  try { recommendations.value = await api(`/recommendations?mode=${encodeURIComponent(mode)}`); }
   catch (error) { showError(error); }
-  finally { loading.value = false; }
+  finally { recommendationLoading.value = false; }
 }
 
 async function uploadImage(event) {
@@ -399,20 +450,35 @@ async function reviewMember(activityId, reviewee) {
 }
 
 async function showMembers() {
-  try { const data = await api(`/activities/${selected.value.id}/contact`); ElMessage.info(data.members.map((member) => member.name).join("、")); }
+  if (selected.value?.creator_id === user.value?.id) return openApplicants(selected.value);
+  try {
+    const data = await api(`/activities/${selected.value.id}/contact`);
+    memberOrganizer.value = data.organizer;
+    applications.value = data.members.map((member) => ({ ...member, user_id: member.id }));
+    applicantsOpen.value = true;
+  }
   catch (error) { showError(error); }
 }
 
+async function copyOrganizerContact() {
+  const contact = selected.value?.creator_contact;
+  if (!contact) return ElMessage.warning("发起人未填写联系方式");
+  try { await navigator.clipboard.writeText(contact); ElMessage.success("发起人联系方式已复制"); }
+  catch { ElMessage.error("复制失败，请手动记录联系方式"); }
+}
+
 const campus = {
+  recommendations, recommendationLoading,
+  cancellationOpen, cancellationTarget, cancellationForm, cancellationBusy, submitCancellation,
   token, user, activities, interests, categories, notifications, stats, selected, query, category,
   showAuth, authMode, busy, avatarUploading, loading, loadError, activityDialogOpen, applicantsOpen,
-  editing, form, applications, myApplications, myActivities, favoriteList, reports,
+  editing, form, applications, memberOrganizer, myApplications, myActivities, favoriteList, reports,
   adminActivities, profile, availability, reviews, activeTab, authForm, unreadCount,
   initialize, load, search, login, logout, openDetail, loadActivity, toggleFavorite,
   join, newActivity, editActivity, saveActivity, loadMine, loadFavorites, loadProfile,
   loadAdmin, openApplicants, reviewApp, withdraw, cancel, toggleAvailability,
-  saveProfile, markRead, markAllRead, report, recommend, uploadImage, uploadAvatar, reportAction,
-  adminRemove, reviewMember, showMembers,
+  saveProfile, markRead, markAllRead, deleteNotification, report, recommend, uploadImage, uploadAvatar, reportAction,
+  adminRemove, reviewMember, showMembers, copyOrganizerContact,
 };
 
 export function useCampus() {

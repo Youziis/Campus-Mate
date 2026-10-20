@@ -27,11 +27,15 @@ export function usePageMotion(root) {
         },
         ({ conditions }) => {
           const items = page.querySelectorAll(".motion-item, .motion-card");
-          if (conditions.reduceMotion) return gsap.set(items, { clearProps: "all" });
+          if (conditions.reduceMotion) {
+            if (items.length) gsap.set(items, { clearProps: "all" });
+            return;
+          }
 
           const timeline = gsap.timeline({ defaults: { duration: 0.62, ease: "power3.out" } });
           if (includeHeader) timeline.from(".topbar", { autoAlpha: 0, y: -18, duration: 0.5 });
-          timeline.from(page.querySelectorAll(".motion-item"), { autoAlpha: 0, y: 24, stagger: 0.08 }, includeHeader ? "-=0.18" : 0);
+          const motionItems = page.querySelectorAll(".motion-item");
+          if (motionItems.length) timeline.from(motionItems, { autoAlpha: 0, y: 24, stagger: 0.08 }, includeHeader ? "-=0.18" : 0);
 
           const cards = page.querySelectorAll(".motion-card");
           if (cards.length) {
@@ -45,7 +49,8 @@ export function usePageMotion(root) {
             });
           }
 
-          gsap.to(page.querySelectorAll(".hero-float"), {
+          const floating = page.querySelectorAll(".hero-float");
+          if (floating.length) gsap.to(floating, {
             y: (index) => (index % 2 ? -8 : 8),
             rotation: (index) => (index % 2 ? 1.2 : -1.2),
             duration: 2.4,
@@ -55,7 +60,8 @@ export function usePageMotion(root) {
             ease: "sine.inOut",
           });
 
-          gsap.fromTo(".scroll-progress", { scaleX: 0 }, {
+          const progress = root.value?.querySelector(".scroll-progress");
+          if (progress) gsap.fromTo(progress, { scaleX: 0 }, {
             scaleX: 1,
             ease: "none",
             scrollTrigger: { trigger: page, start: "top top", end: "bottom bottom", scrub: 0.25 },
