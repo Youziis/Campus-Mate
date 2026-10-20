@@ -1,11 +1,12 @@
 import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
+import { configuredDatabaseFile, initializeSharedDatabase } from "./data-files.js";
 
 // 默认数据库位于 server/data/campus-mate.db；可用 DATABASE_FILE 环境变量覆盖。
-const databaseFile =
-  process.env.DATABASE_FILE || "./server/data/campus-mate.db";
+const databaseFile = configuredDatabaseFile();
 fs.mkdirSync(path.dirname(path.resolve(databaseFile)), { recursive: true });
+initializeSharedDatabase(databaseFile);
 
 export const db = new DatabaseSync(databaseFile);
 

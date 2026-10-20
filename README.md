@@ -8,15 +8,46 @@
 
 ```powershell
 npm install
-npm run db:seed
+Copy-Item .env.example .env
 npm run dev
 ```
 
 打开 <http://localhost:5173/>。API 默认运行在端口 3002，Vite 会自动代理 API 和图片请求。若端口冲突，可修改 `.env` 中的 `PORT`，并同步修改 `vite.config.js` 中的代理端口。
 
-演示账号：`alice@campus.test / mate1234`、`bo@campus.test / mate1234`、`mei@campus.test / mate1234`；管理员：`admin@campus.test / admin123`。图片活动用户：`chenxi@campus.test`、`linan@campus.test`、`yueyue@campus.test`、`shiyu@campus.test`、`haoran@campus.test`、`qinghe@campus.test`，初始密码均为 `12345678`。
+首次启动会自动从 Git 内的 `server/data/campus-mate.snapshot.db` 恢复当前项目的完整数据，包括账号、资料、活动、报名、通知和关联记录。活动图片与头像位于 `server/uploads/`，也随项目下载。已存在的本地数据库不会被自动覆盖。
+
+快照保留导出时的账号密码；当前测试账号可使用 `alice@campus.test`、`bo@campus.test`、`mei@campus.test`。当前快照管理员为 `admin@campus.test / 123456`。历史 `db:seed` 命令生成的账号密码与当前快照可能不同，优先使用团队已约定的测试密码。
 
 请勿在公开部署时使用演示账号或默认 JWT 密钥。复制 `.env.example` 为 `.env` 并设置随机 `JWT_SECRET`。数据库默认写入 `server/data/campus-mate.db`，上传图片位于 `server/uploads/`。
+
+## 多人协作：同步当前数据与图片
+
+### 已经启动过项目，但没有数据的成员
+
+先停止前后端服务，在 GitHub Desktop 拉取包含本次修改的分支，再运行：
+
+```powershell
+npm install
+npm run data:import
+npm run dev
+```
+
+`data:import` 会先把原来的运行数据库及 WAL/SHM 文件备份到 `server/data/backups/`，再导入仓库快照。导入会替换本地数据，请先提交或另行保留需要共享的本地修改。服务未停止时，命令会拒绝导入。
+
+### 将自己新增的数据共享给其他成员
+
+```powershell
+npm run data:export
+git add .
+git commit -m "更新共享数据和活动图片"
+git push
+```
+
+`data:export` 从当前数据库生成一致快照，包含 WAL 中已经提交的最新数据，可在服务运行时执行。提交快照时同时提交 `server/uploads/`，避免其他成员看到活动但图片丢失。
+
+Git 同步的是数据快照，不会实时合并每个人的本地数据库。成员拉取最新快照后，需要停止服务并运行 `npm run data:import` 才会替换自己的已有数据；避免两人同时改动快照，建议由一人统一导出。
+
+版本管理包含完整源码、文档、模型、默认封面、上传资源和共享数据库快照。`.env` 保留在每台电脑上，通过 `.env.example` 配置；依赖由 `npm install` 安装，构建产物由 `npm run build` 生成。
 
 ## 功能
 
@@ -64,7 +95,9 @@ npm run dev
 
 - `server/index.js`：Express 接口路由。认证和权限中间件位于文件顶部，路由按认证、用户、活动、报名、评价、通知和管理功能分组。
 - `server/db.js`：SQLite 文件位置、连接设置和 13 张表的结构。新增字段时请注意，`CREATE TABLE IF NOT EXISTS` 不会给已有数据库自动加列；需要配套数据库迁移。
-- `server/seed.js`：兴趣标签、演示账号和 50 条推荐活动。演示活动会在重复执行时刷新到未来日期，不会重复插入；种子账号使用 `INSERT OR IGNORE`，不会覆盖已有用户密码。
+- `server/seed.js`：可选的历史演示种子，用于生成预设账号和图片活动，与当前共享快照不同；已有数据时不建议重复运行，以免重新插入已删除活动或改变活动日期。
+- `server/data-files.js`：首次启动恢复共享快照，已有运行库保持不变。
+- `scripts/project-data.js`：导出当前数据快照、备份并导入团队共享数据。
 - `src/App.vue`：前端页面状态、交互处理和 API 请求调用。
 
 数据库默认路径为 `server/data/campus-mate.db`，也可以通过 `.env` 中的 `DATABASE_FILE` 指定其他位置。
