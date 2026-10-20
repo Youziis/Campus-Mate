@@ -570,3 +570,9 @@
 `DELETE /api/notifications/:id`：需要 Bearer 登录令牌。路径参数 `id` 为通知 ID，无请求体。
 仅删除当前用户自己的通知，成功返回 `{ "ok": true }`；未登录返回 401，通知不存在或不属于当前用户返回 404 和 `{ "error": "通知不存在" }`。
 
+# 活动时间约定
+
+活动录入与展示统一使用北京时间（Asia/Shanghai）。接口的 `starts_at`、`ends_at`
+返回 UTC ISO 字符串；带时区的请求按实际时刻保存，无时区的日期时间视为北京时间。
+`GET /api/activities?date=YYYY-MM-DD` 按北京日期筛选。推荐的空闲时段匹配也按北京时间计算。
+

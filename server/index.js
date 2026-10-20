@@ -9,6 +9,7 @@ import fs from "node:fs";
 import { db, notify } from "./db.js";
 import { registerAi } from "./ai.js";
 import { normalizeInterests, replaceInterests } from "./interests.js";
+import { activityDate, activityIso } from "../shared/time.js";
 const app = express(),
   secret = process.env.JWT_SECRET || "campus-mate-local-demo-secret-change-me";
 
@@ -213,7 +214,7 @@ app.get("/api/activities", (req, res) => {
     args.push(category);
   }
   if (date) {
-    sql += " AND date(a.starts_at)=date(?)";
+    sql += " AND date(a.starts_at,'+8 hours')=date(?)";
     args.push(date);
   }
   if (interest) {
@@ -254,7 +255,8 @@ app.post("/api/activities", auth, (req, res) => {
     !category ||
     !location ||
     !starts_at ||
-    new Date(starts_at) <= new Date()
+    !Number.isFinite(activityDate(starts_at).getTime()) ||
+    activityDate(starts_at) <= new Date()
   )
     return res.status(400).json({ error: "请填写完整信息并选择未来时间" });
   const categoryRecord = db
@@ -273,8 +275,8 @@ app.post("/api/activities", auth, (req, res) => {
       categoryRecord.name,
       categoryRecord.id,
       location,
-      starts_at,
-      ends_at || null,
+      activityIso(starts_at),
+      ends_at ? activityIso(ends_at) : null,
       Math.max(2, Number(capacity) || 6),
       req.body.image || null,
     );
@@ -303,6 +305,8 @@ app.patch("/api/activities/:id", auth, (req, res) => {
     "status",
   ];
   const set = keys.filter((k) => req.body[k] !== undefined);
+  if (req.body.starts_at !== undefined) req.body.starts_at = activityIso(req.body.starts_at);
+  if (req.body.ends_at !== undefined) req.body.ends_at = req.body.ends_at ? activityIso(req.body.ends_at) : null;
   if (req.body.category !== undefined) {
     const categoryRecord = db
       .prepare("SELECT id,name FROM activity_categories WHERE name=? AND enabled=1")
@@ -585,9 +589,9 @@ app.get("/api/recommendations", auth, (req, res) => {
     .map((item) => {
       const itemNames = new Set(item.interests || []);
       const sharedInterests = [...itemNames].filter((name) => ownNames.has(name)).length;
-      const start = new Date(item.starts_at);
-      const weekday = start.getDay();
-      const hour = start.getHours() + start.getMinutes() / 60;
+      const start = new Date(activityDate(item.starts_at).getTime() + 8 * 3600000);
+      const weekday = start.getUTCDay();
+      const hour = start.getUTCHours() + start.getUTCMinutes() / 60;
       const period = hour >= 8.2 && hour < 9.95 ? "1-2"
         : hour >= 10.25 && hour < 11.84 ? "3-4"
           : hour >= 14.33 && hour < 15.92 ? "5-6"

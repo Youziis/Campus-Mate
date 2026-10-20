@@ -1,5 +1,14 @@
 # Campus Mate frontend redesign plan
 
+## Beijing activity times and Chinese calendar
+
+Element Plus uses the zh-cn locale. Publish/edit calendars display Chinese dates
+and label their input timezone. Shared time helpers convert Beijing wall time to
+UTC for API requests and convert timestamps back before editing; list formatting
+is fixed to Asia/Shanghai. Backend create/edit normalization, date filtering and
+recommendation time matching use the same timezone. Existing UTC timestamps are
+preserved, without bulk shifting database records.
+
 ## Discovery list restoration
 
 Recommendation results and loading state now live separately from discovery

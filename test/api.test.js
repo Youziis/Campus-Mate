@@ -111,16 +111,21 @@ test("core campus activity flow respects login, approval, privacy and admin acce
     assert.equal((await updateTags([123])).status, 400);
     assert.deepEqual((await (await call(`/users/${self.id}`, alice)).json()).interests, profileTags);
     const created = await call("/activities", alice, {
-      method: "POST", body: JSON.stringify({ title: "Custom tags", description: "Test", category: "学习", location: "Library", starts_at: new Date(Date.now() + 86400000).toISOString(), interests: ["奶龙打卡", "新活动标签"] }),
+      method: "POST", body: JSON.stringify({ title: "Custom tags", description: "Test", category: "学习", location: "Library", starts_at: "2099-01-01T00:30", interests: ["奶龙打卡", "新活动标签"] }),
     });
     assert.equal(created.status, 201);
     const taggedActivity = await created.json();
+    assert.equal(taggedActivity.starts_at, "2098-12-31T16:30:00.000Z");
+    const dateFiltered = await (await call("/activities?date=2099-01-01", alice)).json();
+    assert.ok(dateFiltered.some((item) => item.id === taggedActivity.id));
     assert.ok(taggedActivity.interests.includes("新活动标签"));
     const edited = await call(`/activities/${taggedActivity.id}`, alice, {
-      method: "PATCH", body: JSON.stringify({ interests: "自定义编辑标签 自定义编辑标签" }),
+      method: "PATCH", body: JSON.stringify({ interests: "自定义编辑标签 自定义编辑标签", starts_at: "2099-01-02T19:00" }),
     });
     assert.equal(edited.status, 200);
-    assert.deepEqual((await edited.json()).interests, ["自定义编辑标签"]);
+    const editedActivity = await edited.json();
+    assert.deepEqual(editedActivity.interests, ["自定义编辑标签"]);
+    assert.equal(editedActivity.starts_at, "2099-01-02T11:00:00.000Z");
     assert.equal((await updateTags([])).status, 200);
     assert.deepEqual((await (await call(`/users/${self.id}`, alice)).json()).interests, []);
     // Cancellation preserves ownership checks and notifies approved members once.

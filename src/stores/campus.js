@@ -1,6 +1,7 @@
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { activityDate, activityIso, beijingInput } from "../../shared/time.js";
 
 const API = "/api";
 let router;
@@ -83,7 +84,7 @@ export function formatDate(value, includeTime = false) {
   const options = includeTime
     ? { month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit" }
     : { month: "long", day: "numeric", weekday: "short" };
-  return new Date(value).toLocaleString("zh-CN", options);
+  return activityDate(value).toLocaleString("zh-CN", { ...options, timeZone: "Asia/Shanghai" });
 }
 
 export function iconFor(categoryName) {
@@ -237,7 +238,7 @@ function newActivity() {
 
 function editActivity(activity) {
   editing.value = true;
-  form.value = { ...activity, starts_at: activity.starts_at?.slice(0, 16), ends_at: activity.ends_at?.slice(0, 16) };
+  form.value = { ...activity, starts_at: beijingInput(activity.starts_at), ends_at: beijingInput(activity.ends_at) };
   activityDialogOpen.value = true;
 }
 
@@ -245,8 +246,8 @@ async function saveActivity() {
   try {
     const body = {
       ...form.value,
-      starts_at: new Date(form.value.starts_at).toISOString(),
-      ends_at: form.value.ends_at ? new Date(form.value.ends_at).toISOString() : null,
+      starts_at: activityIso(form.value.starts_at),
+      ends_at: form.value.ends_at ? activityIso(form.value.ends_at) : null,
     };
     await api(editing.value ? `/activities/${form.value.id}` : "/activities", {
       method: editing.value ? "PATCH" : "POST",
