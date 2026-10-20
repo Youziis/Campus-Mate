@@ -107,6 +107,20 @@
   display: block;
 }
 
+.detail-role-status {
+  padding: 7px 11px;
+  color: var(--cm-ink-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  background: var(--cm-surface-muted);
+  border-radius: 999px;
+}
+
+.detail-role-status.approved {
+  color: #197a5b;
+  background: #e4f5ed;
+}
+
 .host-detail b {
   font-size: 13px;
 }
@@ -181,3 +195,6 @@
 }
 .detail-facts dt, .host-detail small, .review-strip, .privacy-hint { font-size:12px; }
 .detail-facts dd, .detail-desc { font-size:14px; }
+.detail-host-avatar { overflow: hidden; }
+.detail-host-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+

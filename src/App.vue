@@ -6,7 +6,7 @@ import AppFooter from "./components/layout/AppFooter.vue";
 import AuthDialog from "./components/dialogs/AuthDialog.vue";
 import ActivityDialog from "./components/dialogs/ActivityDialog.vue";
 import ApplicantsDialog from "./components/dialogs/ApplicantsDialog.vue";
-import PublishFab from "./components/PublishFab.vue";
+import CancellationDialog from "./components/dialogs/CancellationDialog.vue";
 import RadialMenu from "./components/RadialMenu.vue";
 import { usePageMotion } from "./composables/usePageMotion";
 import { useCampus } from "./stores/campus";
@@ -42,10 +42,10 @@ onMounted(async () => {
       <RouterView />
     </main>
     <AppFooter />
-    <RadialMenu v-if="route.name === 'discover'" />
-    <PublishFab v-else />
+    <RadialMenu />
     <AuthDialog />
     <ActivityDialog />
     <ApplicantsDialog />
+    <CancellationDialog />
   </div>
 </template>

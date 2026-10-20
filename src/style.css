@@ -470,6 +470,24 @@ a:focus-visible,
   box-shadow: 0 0 0 1px var(--cm-line) inset;
 }
 
+/* Element Plus 的焦点边框由圆角外壳绘制，避免全局 tabindex 轮廓框住内部输入元素。 */
+.el-input .el-input__inner:focus-visible,
+.el-select .el-select__input:focus-visible,
+.el-date-editor .el-range-input:focus-visible,
+.el-input .el-input__wrapper:focus-visible,
+.el-select .el-select__wrapper:focus-visible,
+.el-date-editor.el-range-editor:focus-visible,
+.el-textarea .el-textarea__inner:focus-visible {
+  outline: none;
+}
+
+.el-input .el-input__wrapper:focus-within,
+.el-select .el-select__wrapper.is-focused,
+.el-date-editor.el-range-editor:focus-within,
+.el-textarea .el-textarea__inner:focus {
+  box-shadow: 0 0 0 1px var(--cm-brand) inset;
+}
+
 footer {
   display: flex;
   flex-shrink: 0;

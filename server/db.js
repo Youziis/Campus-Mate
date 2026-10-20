@@ -1,17 +1,20 @@
 import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
+import { configuredDatabaseFile, initializeSharedDatabase } from "./data-files.js";
 
 // 默认数据库位于 server/data/campus-mate.db；可用 DATABASE_FILE 环境变量覆盖。
-const databaseFile =
-  process.env.DATABASE_FILE || "./server/data/campus-mate.db";
+const databaseFile = configuredDatabaseFile();
 fs.mkdirSync(path.dirname(path.resolve(databaseFile)), { recursive: true });
+initializeSharedDatabase(databaseFile);
 
 export const db = new DatabaseSync(databaseFile);
 
 // WAL 提升读写并发；外键约束用于维护关联数据的一致性。
 db.exec("PRAGMA journal_mode = WAL;");
 db.exec("PRAGMA foreign_keys = ON;");
+
+// 联系方式属于用户私密资料，旧数据库启动时自动补充字段。
 
 // 所有表在服务启动时自动创建。给已有项目增加字段时，还要补充数据库迁移。
 db.exec(`
@@ -174,6 +177,11 @@ db.exec(`
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
 `);
+
+const userColumns = db.prepare("PRAGMA table_info(users)").all();
+if (!userColumns.some((column) => column.name === "contact")) {
+  db.exec("ALTER TABLE users ADD COLUMN contact TEXT DEFAULT ''");
+}
 
 // 旧数据库没有 category_id；启动时执行轻量迁移，不要求用户删除原数据库。
 const activityColumns = db.prepare("PRAGMA table_info(activities)").all();

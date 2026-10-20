@@ -24,5 +24,8 @@ These rules apply to every automated agent working in this repository.
 - Do not weaken login, role, ownership, membership, or contact privacy checks.
 - Do not replace real API data with permanent mock data.
 - Preserve loading, empty, error, disabled, and permission denied states.
-- Keep database files, uploads, `.env`, `node_modules`, and build output out of Git.
+- Per the user's data-sharing request, track `server/data/campus-mate.snapshot.db`
+  and `server/uploads/` so collaborators receive current data and images.
+- Export snapshots with `npm run data:export`; never track the live database,
+  its WAL/SHM files, local backups, `.env`, dependencies, caches or build output.
 

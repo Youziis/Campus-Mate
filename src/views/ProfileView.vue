@@ -80,6 +80,7 @@ onUnmounted(() => motionContext?.revert());
               <label class="profile-field"><span>昵称</span><el-input v-model="store.profile.value.name" placeholder="你的称呼" /></label>
               <label class="profile-field"><span>专业</span><el-input v-model="store.profile.value.major" placeholder="例如：设计学院" /></label>
               <label class="profile-field"><span>年级</span><el-input v-model="store.profile.value.year" placeholder="例如：大二" /></label>
+              <label class="profile-field profile-field-wide profile-contact-field"><span>联系方式</span><el-input v-model="store.profile.value.contact" maxlength="80" placeholder="微信号、手机号或其他方便联系的方式" /><small class="profile-contact-hint">仅对你发起的活动成员、以及你通过审核加入的活动成员开放。</small></label>
               <label class="profile-field profile-field-wide"><span>个人介绍</span><el-input v-model="store.profile.value.bio" type="textarea" :rows="4" maxlength="180" show-word-limit placeholder="说说你喜欢的活动，以及希望遇见怎样的搭子…" /></label>
               <label class="profile-field profile-field-wide"><span>兴趣标签</span><small>填写你喜欢的事，让推荐更贴近你的兴趣。</small><InterestInput v-model="store.profile.value.interests" /></label>
             </div>

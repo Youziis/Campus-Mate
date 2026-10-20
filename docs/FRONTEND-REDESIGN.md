@@ -1,5 +1,77 @@
 # Campus Mate frontend redesign plan
 
+## Authentication input focus (2026-10-20)
+
+- Scope: `AuthDialog.vue` only. Login and registration share the same scoped
+  input dimensions, rounded wrapper border, and keyboard/click focus treatment.
+- Preserve `POST /api/auth/login` and `POST /api/auth/register`, the existing
+  `{ name, email, password }` request body, JWT storage and current user refresh.
+- Preserve opening/closing the dialog, switching modes, Enter submission,
+  password visibility, pending feedback and server error handling.
+- The rounded wrapper draws the field border. The inner native input has no
+  second outline, and browser autofill uses the same field surface and radius.
+- Password autocomplete distinguishes current passwords from new passwords.
+- Verified: production build and existing API regression pass. Edge checks pass
+  for both modes at 1280px and 390px, including click/Tab focus, stable field
+  dimensions, password visibility, and the forced Chromium autofill pseudo state.
+  Real registration and login were exercised against a temporary SQLite database.
+
+## Form focus borders
+
+Element Plus form controls use their rounded outer wrapper's inset focus border.
+Inner inputs, select inputs and range inputs suppress the duplicate generic
+tabindex outline. Textareas draw their focus border on the textarea itself.
+Button and link keyboard focus outlines remain available.
+
+## Beijing activity times and Chinese calendar
+
+Element Plus uses the zh-cn locale. Publish/edit calendars display Chinese dates
+and label their input timezone. Shared time helpers convert Beijing wall time to
+UTC for API requests and convert timestamps back before editing; list formatting
+is fixed to Asia/Shanghai. Backend create/edit normalization, date filtering and
+recommendation time matching use the same timezone. Existing UTC timestamps are
+preserved, without bulk shifting database records.
+
+## Discovery list restoration
+
+Recommendation results and loading state now live separately from discovery
+activities. Visiting recommendations no longer replaces the discovery catalogue
+or toggles its skeleton. Discovery finishes its current Flip transition before
+starting another category filter or unmounting, releasing temporary layout state.
+
+## Global quick menu
+
+App mounts one persistent RadialMenu on every route. All pages share browse,
+publish, recommendations, my activities and AI companion actions. Browsing from
+another page navigates to discovery before scrolling to the activity list.
+Existing login checks and publish actions are preserved.
+
+## Notification deletion
+
+Notifications retain read and mark-all-read actions. Each row now has a separate
+delete button with confirmation and pending feedback. DELETE /api/notifications/:id
+enforces ownership; successful deletion removes the local row and updates the
+computed unread badge. Failures retain the notification. Multiline cancellation
+announcements preserve line breaks.
+
+## Activity cancellation form
+
+The hosted activity card's cancel action now opens CancellationDialog. It requires
+a reason and announcement before DELETE /api/activities/:id. Submission is locked
+while pending; failures retain inputs, success refreshes hosted/joined lists and
+removes the deleted activity from local favorites. The backend sends durable
+notifications and deletes the activity atomically. Build and API regression pass.
+
+## Unified activity member information
+
+Activity details retain GET /api/activities/:id. Organizers load applications
+through GET /api/activities/:id/applications and retain approval/rejection actions.
+Approved participants use GET /api/activities/:id/contact. Both roles now open
+ApplicantsDialog with the same member rows and contact copy controls. Participants
+see themselves without contact details, then the organizer and other members;
+only organizers see pending applications and review actions. Empty animation
+targets are skipped during page transitions, and the account user SVG path is fixed.
+
 ## AI assistant Live2D integration
 
 Current interface: the character appears on the left instead of the former chat

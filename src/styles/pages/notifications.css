@@ -1,21 +1,28 @@
-.notification-list > button {
+.notification-list .notification-main {
   display: flex;
-  width: 100%;
+  min-width: 0;
+  flex: 1;
   align-items: flex-start;
   gap: 14px;
   padding: 19px;
   color: inherit;
   text-align: left;
   border: 0;
-  border-bottom: 1px solid var(--cm-line);
   background: transparent;
 }
 
-.notification-list > button:last-of-type {
+.notification-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--cm-line);
+  padding-right: 12px;
+}
+
+.notification-row:last-of-type {
   border-bottom: 0;
 }
 
-.notification-list > button.unread {
+.notification-row.unread {
   background: #f0f4ed;
 }
 
@@ -39,6 +46,8 @@
 
 .notification-copy {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .notification-copy b {
@@ -46,6 +55,7 @@
 }
 
 .notification-copy span {
+  white-space: pre-line;
   margin: 6px 0;
   color: var(--cm-ink-muted);
   font-size: 12px;
@@ -64,3 +74,6 @@
   border-radius: 50%;
 }
 .notification-copy small { font-size:11px; }
+.notification-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.notification-toolbar .el-button + .el-button { margin-left: 0; }
+

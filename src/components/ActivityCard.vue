@@ -1,8 +1,10 @@
 <script setup>
+import { ref } from "vue";
 import { coverStyle, formatDate, iconFor, useCampus } from "../stores/campus";
 
 defineProps({ activity: { type: Object, required: true }, featured: Boolean, manageable: Boolean, favoriteMode: Boolean });
 const store = useCampus();
+const failedAvatar = ref("");
 </script>
 
 <template>
@@ -15,7 +17,16 @@ const store = useCampus();
     </div>
     <div class="activity-info">
       <div class="date-line">{{ formatDate(activity.starts_at, true) }}</div><h3>{{ activity.title }}</h3><p>{{ activity.description || activity.location }}</p>
-      <div class="card-bottom"><span class="host"><span class="small-avatar">{{ activity.creator_name?.[0] }}</span>{{ activity.creator_name }}</span><span class="member-count">{{ activity.member_count }} / {{ activity.capacity }} 人</span></div>
+      <div class="card-bottom">
+        <span class="host">
+          <span class="small-avatar card-host-avatar">
+            <img v-if="activity.creator_avatar && failedAvatar !== activity.creator_avatar" :src="activity.creator_avatar" :alt="`${activity.creator_name || '发起人'}的头像`" @error="failedAvatar = activity.creator_avatar" />
+            <span v-else>{{ Array.from(activity.creator_name?.trim() || '友')[0] }}</span>
+          </span>
+          {{ activity.creator_name }}
+        </span>
+        <span class="member-count">{{ activity.member_count }} / {{ activity.capacity }} 人</span>
+      </div>
       <div v-if="manageable" class="inline-actions" @click.stop><el-button size="small" @click="store.openApplicants(activity)">报名管理 <span v-if="activity.pending_count" class="pending">{{ activity.pending_count }}</span></el-button><el-button size="small" @click="store.editActivity(activity)">编辑</el-button><el-button size="small" type="danger" plain @click="store.cancel(activity)">取消</el-button></div>
     </div>
   </article>

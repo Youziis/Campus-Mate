@@ -146,6 +146,7 @@
 .profile-field { display: block; }
 .profile-field > span { display: block; margin-bottom: 8px; color: var(--cm-ink); font-size: 10px; font-weight: 680; }
 .profile-field > small { display: block; margin: -3px 0 9px; color: var(--cm-ink-muted); font-size: 8px; }
+.profile-contact-field > .profile-contact-hint { margin: 9px 0 0; line-height: 1.6; }
 .profile-field-wide { grid-column: 1 / -1; }
 .profile-field .el-select { width: 100%; }
 .profile-editor .el-input__wrapper,
