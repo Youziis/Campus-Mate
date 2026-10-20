@@ -1,5 +1,12 @@
 # Campus Mate frontend redesign plan
 
+## Form focus borders
+
+Element Plus form controls use their rounded outer wrapper's inset focus border.
+Inner inputs, select inputs and range inputs suppress the duplicate generic
+tabindex outline. Textareas draw their focus border on the textarea itself.
+Button and link keyboard focus outlines remain available.
+
 ## Beijing activity times and Chinese calendar
 
 Element Plus uses the zh-cn locale. Publish/edit calendars display Chinese dates
