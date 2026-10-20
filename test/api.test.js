@@ -67,6 +67,9 @@ test("core campus activity flow respects login, approval, privacy and admin acce
       (x) => x.creator_name === "陈同学",
     );
     assert.ok(a);
+    // Seeded activities have no organizer application; the organizer still counts.
+    assert.equal(a.member_count, 1);
+    assert.equal((await call(`/activities/${a.id}`, bo, { method: "PATCH", body: JSON.stringify({ capacity: 2 }) })).status, 200);
     assert.equal((await call(`/activities/${a.id}/contact`, mei)).status, 403);
     let r = await call(`/activities/${a.id}/applications`, mei, {
       method: "POST",
@@ -87,6 +90,8 @@ test("core campus activity flow respects login, approval, privacy and admin acce
       200,
     );
     assert.equal((await call(`/activities/${a.id}/contact`, mei)).status, 200);
+    assert.equal((await (await call(`/activities/${a.id}`, mei)).json()).member_count, 2);
+    assert.equal((await call(`/activities/${a.id}/applications`, alice, { method: "POST", body: JSON.stringify({ message: "已满员测试" }) })).status, 409);
     assert.equal(
       (await call(`/activities/${a.id}/favorite`, mei, { method: "POST" }))
         .status,
@@ -115,6 +120,8 @@ test("core campus activity flow respects login, approval, privacy and admin acce
     });
     assert.equal(created.status, 201);
     const taggedActivity = await created.json();
+    // User-created activities contain an organizer application: count them once.
+    assert.equal(taggedActivity.member_count, 1);
     assert.equal(taggedActivity.starts_at, "2098-12-31T16:30:00.000Z");
     const dateFiltered = await (await call("/activities?date=2099-01-01", alice)).json();
     assert.ok(dateFiltered.some((item) => item.id === taggedActivity.id));

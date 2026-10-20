@@ -47,7 +47,7 @@ const userSafe = (u) => {
 function activity(id, viewer) {
   const a = db
     .prepare(
-      `SELECT a.*,COALESCE(c.name,a.category) category,c.cover category_cover,c.icon category_icon,u.name creator_name,u.avatar creator_avatar,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='approved') member_count,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='pending') pending_count,EXISTS(SELECT 1 FROM favorites f WHERE f.activity_id=a.id AND f.user_id=?) is_favorite,(SELECT x.status FROM applications x WHERE x.activity_id=a.id AND x.user_id=? ORDER BY x.created_at DESC LIMIT 1) application_status FROM activities a LEFT JOIN activity_categories c ON c.id=a.category_id JOIN users u ON u.id=a.creator_id WHERE a.id=?`,
+      `SELECT a.*,COALESCE(c.name,a.category) category,c.cover category_cover,c.icon category_icon,u.name creator_name,u.avatar creator_avatar,(1 + (SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='approved' AND x.user_id<>a.creator_id)) member_count,(SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='pending') pending_count,EXISTS(SELECT 1 FROM favorites f WHERE f.activity_id=a.id AND f.user_id=?) is_favorite,(SELECT x.status FROM applications x WHERE x.activity_id=a.id AND x.user_id=? ORDER BY x.created_at DESC LIMIT 1) application_status FROM activities a LEFT JOIN activity_categories c ON c.id=a.category_id JOIN users u ON u.id=a.creator_id WHERE a.id=?`,
     )
     .get(viewer || 0, viewer || 0, id);
   if (a) {
@@ -224,7 +224,7 @@ app.get("/api/activities", (req, res) => {
   }
   sql +=
     sort === "popular"
-      ? ' ORDER BY (SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status="approved") DESC'
+      ? " ORDER BY (1 + (SELECT count(*) FROM applications x WHERE x.activity_id=a.id AND x.status='approved' AND x.user_id<>a.creator_id)) DESC"
       : " ORDER BY a.starts_at ASC";
   res.json(
     db
@@ -368,9 +368,9 @@ app.post("/api/activities/:id/applications", auth, (req, res) => {
     return res.status(400).json({ error: "不能报名自己的活动" });
   const count = db
     .prepare(
-      "SELECT count(*) n FROM applications WHERE activity_id=? AND status='approved'",
+      "SELECT 1 + count(*) n FROM applications WHERE activity_id=? AND status='approved' AND user_id<>?",
     )
-    .get(a.id).n;
+    .get(a.id, a.creator_id).n;
   if (count >= a.capacity)
     return res.status(409).json({ error: "活动名额已满" });
   try {
@@ -417,9 +417,9 @@ app.patch("/api/applications/:id", auth, (req, res) => {
     req.body.status === "approved" &&
     db
       .prepare(
-        "SELECT count(*) n FROM applications WHERE activity_id=? AND status='approved'",
+        "SELECT 1 + count(*) n FROM applications WHERE activity_id=? AND status='approved' AND user_id<>?",
       )
-      .get(x.activity_id).n >= x.capacity
+      .get(x.activity_id, x.creator_id).n >= x.capacity
   )
     return res.status(409).json({ error: "名额已满" });
   db.prepare("UPDATE applications SET status=? WHERE id=?").run(
