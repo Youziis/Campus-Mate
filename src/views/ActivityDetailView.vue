@@ -40,7 +40,7 @@ watch(() => route.params.id, loadActivity);
           <span v-if="store.selected.value.creator_id === store.user.value?.id" class="detail-role-status">你是活动发起者</span>
           <span v-else-if="store.selected.value.is_member || store.selected.value.application_status === 'approved'" class="detail-role-status approved">已通过审核</span>
           <el-button v-else-if="store.selected.value.application_status === 'pending'" disabled>已申请，等待审核</el-button>
-          <el-button v-else type="primary" @click="store.join(store.selected.value)">申请加入</el-button>
+          <el-button v-else type="primary" :loading="store.joinLoading.value" :disabled="store.joinLoading.value" @click="store.join(store.selected.value)">申请加入</el-button>
           <el-button v-if="store.selected.value.creator_id === store.user.value?.id" @click="store.openApplicants(store.selected.value)">成员与信息</el-button>
           <el-button v-else-if="store.selected.value.is_member || store.selected.value.application_status === 'approved'" @click="store.showMembers">成员与信息</el-button>
         </div>

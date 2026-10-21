@@ -17,6 +17,7 @@ const categories = ref([]);
 const notifications = ref([]);
 const stats = ref({});
 const selected = ref(null);
+const joinLoading = ref(false);
 const query = ref("");
 const category = ref("全部");
 const showAuth = ref(false);
@@ -223,11 +224,19 @@ async function toggleFavorite(activity) {
 
 async function join(activity) {
   if (!token.value) return (showAuth.value = true);
+  if (joinLoading.value || activity.application_status === "pending" || activity.application_status === "approved") return;
   try {
     const { value } = await ElMessageBox.prompt("给组织者留句话吧（可选）", "申请加入", { inputPlaceholder: "简单介绍一下自己" });
-    await api(`/activities/${activity.id}/applications`, { method: "POST", body: JSON.stringify({ message: value || "" }) });
+    joinLoading.value = true;
+    const result = await api(`/activities/${activity.id}/applications`, { method: "POST", body: JSON.stringify({ message: value || "" }) });
+    activity.application_status = result.status || "pending";
+    if (Number(selected.value?.id) === Number(activity.id)) {
+      selected.value.application_status = result.status || "pending";
+      selected.value.is_member = false;
+    }
     ElMessage.success("申请已发送，等待组织者审核");
   } catch (error) { if (error !== "cancel" && error !== "close") showError(error); }
+  finally { joinLoading.value = false; }
 }
 
 function newActivity() {
@@ -542,7 +551,7 @@ async function copyOrganizerContact() {
 const campus = {
   recommendations, recommendationLoading,
   cancellationOpen, cancellationTarget, cancellationForm, cancellationBusy, submitCancellation,
-  token, user, activities, interests, categories, notifications, stats, selected, query, category,
+  token, user, activities, interests, categories, notifications, stats, selected, joinLoading, query, category,
   showAuth, authMode, busy, avatarUploading, loading, loadError, activityDialogOpen, applicantsOpen,
   editing, form, applications, memberOrganizer, myApplications, myActivities, favoriteList, reports,
   adminActivities, profile, availability, reviews, activeTab, authForm, unreadCount,
