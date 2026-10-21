@@ -13,7 +13,7 @@
           <span>↻</span><b>重新洗牌</b><small>加速牌阵，刷新一批活动</small>
         </button>
         <button class="deck-action draw-action" :disabled="shuffling" @click="drawCard">
-          <span>✦</span><b>抽取缘分</b><small>从滚动牌阵中抽出一张</small>
+          <span>✦</span><b>抽取缘分</b><small>匹配分越高，抽中机会越大</small>
         </button>
       </div>
       <div class="deck-meta"><span>{{ deck.length }} 张</span><span>已抽取 {{ drawCount }} 次</span></div>
@@ -125,6 +125,24 @@ function shuffled(items) {
   return result;
 }
 
+// 抽卡按推荐分数加权：分数越高，被抽中的区间越大；0 分活动仍保留少量机会。
+function weightedDraw(items) {
+  if (!items.length) return null;
+  const weighted = items.map((item) => ({
+    item,
+    weight: Math.max(1, Number(item.recommendationScore) || 0),
+  }));
+  const totalWeight = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+  let ticket = Math.random() * totalWeight;
+
+  for (const entry of weighted) {
+    if (ticket < entry.weight) return entry.item;
+    ticket -= entry.weight;
+  }
+
+  return weighted.at(-1).item;
+}
+
 const wait = (seconds) => new Promise((resolve) => gsap.delayedCall(seconds, resolve));
 
 function tweenSpeed(to, duration, ease) {
@@ -214,7 +232,7 @@ function shuffleDeck() {
 function drawCard() {
   if (shuffling.value || !deck.value.length) return;
   return spin(async () => {
-    const chosen = deck.value[Math.floor(Math.random() * deck.value.length)];
+    const chosen = weightedDraw(deck.value);
     await swapDeck();
     drawn.value = chosen;
     drawCount.value += 1;
