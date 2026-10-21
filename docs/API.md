@@ -493,7 +493,7 @@
 
 **权限：** 登录
 
-**参数：** Header：Bearer Token；JSON Body：`target_type`（string）、`target_id`（number）、`reason`（string），三项必填。
+**参数：** Header：Bearer Token；JSON Body：`target_type`（仅支持 `activity`）、`target_id`（number）、`reason`（string，1–1000 字），三项必填。
 
 ```json
 {
@@ -505,7 +505,7 @@
 
 **返回结果（201）：** `{ "ok": true }`。
 
-**报错代码：** `400` 必填字段缺失；`401` 未登录。
+**报错代码：** `400` 参数缺失、类型不支持或原因超长；`401` 未登录；`404` 活动不存在。
 
 ### 7.2 `GET /api/admin/reports` — 获取举报列表
 
@@ -513,7 +513,7 @@
 
 **参数：** Header：Bearer Token。
 
-**返回结果（200）：** 举报对象数组，每项附加 `reporter_name`。
+**返回结果（200）：** 举报对象数组，包含举报人、活动标题/封面、发起人、活动状态、处理方式与管理员理由。待处理举报排在前面。
 
 **报错代码：** `401` 未登录；`403` 非管理员。
 
@@ -521,11 +521,11 @@
 
 **权限：** 管理员
 
-**参数：** Path：`id`（举报 ID）；Header：Bearer Token；JSON Body：`{ "status": "resolved" }`。传 `resolved` 会设为已处理，其他值会设为 `dismissed`。
+**参数：** Path：`id`（举报 ID）；Header：Bearer Token；JSON Body：`decision`（`keep` 保留活动或 `remove` 下架活动），以及 `reason`（管理员处理理由，最多 1000 字；下架时必填）。
 
-**返回结果（200）：** `{ "ok": true }`，并写入管理员操作记录。
+**返回结果（200）：** `{ "ok": true, "report": {...}, "activity_status": "open|removed" }`。保留活动会将举报标记为 `dismissed`；下架会将举报标记为 `resolved`、活动状态设为 `removed`，并向发起人发送包含下架理由的站内通知。同一活动的其他待处理举报也会一并结案。管理员操作会写入审计记录。
 
-**报错代码：** `401` 未登录；`403` 非管理员。当前实现对不存在的举报 ID 也返回成功。
+**报错代码：** `400` 决策或理由无效；`401` 未登录；`403` 非管理员；`404` 举报或活动不存在；`409` 举报已处理。
 
 ### 7.4 `GET /api/admin/activities` — 获取全部活动
 
@@ -541,11 +541,11 @@
 
 **权限：** 管理员
 
-**参数：** Path：`id`（活动 ID）；Header：Bearer Token。
+**参数：** Path：`id`（活动 ID）；Header：Bearer Token；JSON Body：`reason`（下架理由，1–1000 字）。
 
-**返回结果（200）：** `{ "ok": true }`；活动 `status` 会设置为 `removed`，并记录管理员操作。
+**返回结果（200）：** `{ "ok": true, "status": "removed" }`；活动会下架，发起人收到含理由的站内通知，相关待处理举报会结案，并记录管理员操作。
 
-**报错代码：** `401` 未登录；`403` 非管理员。当前实现对不存在的活动 ID 也返回成功。
+**报错代码：** `400` 缺少下架理由；`401` 未登录；`403` 非管理员；`404` 活动不存在。
 
 ### 7.6 `POST /api/uploads` — 上传图片
 

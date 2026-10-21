@@ -642,31 +642,89 @@ app.post("/api/notifications/read-all", auth, (req, res) => {
 // 举报及管理员后台接口。管理员操作会记录到 admin_actions 审计表。
 app.post("/api/reports", auth, (req, res) => {
   const { target_type, target_id, reason } = req.body;
-  if (!target_type || !target_id || !reason)
-    return res.status(400).json({ error: "请填写举报原因" });
+  if (target_type !== "activity" || !Number.isInteger(Number(target_id)) || Number(target_id) <= 0 || typeof reason !== "string" || !reason.trim())
+    return res.status(400).json({ error: "请选择有效活动并填写举报原因" });
+  if (reason.trim().length > 1000)
+    return res.status(400).json({ error: "举报原因不能超过 1000 字" });
+  const target = db.prepare("SELECT id FROM activities WHERE id=?").get(Number(target_id));
+  if (!target) return res.status(404).json({ error: "活动不存在" });
   db.prepare(
     "INSERT INTO reports(reporter_id,target_type,target_id,reason) VALUES(?,?,?,?)",
-  ).run(req.user.id, target_type, target_id, reason);
+  ).run(req.user.id, target_type, Number(target_id), reason.trim());
   res.status(201).json({ ok: true });
 });
 app.get("/api/admin/reports", auth, admin, (_, res) =>
   res.json(
     db
       .prepare(
-        "SELECT r.*,u.name reporter_name FROM reports r JOIN users u ON u.id=r.reporter_id ORDER BY r.created_at DESC",
+        `SELECT r.*,reporter.name reporter_name,a.title activity_title,a.image activity_image,
+                a.status activity_status,a.creator_id,creator.name creator_name
+         FROM reports r
+         JOIN users reporter ON reporter.id=r.reporter_id
+         LEFT JOIN activities a ON r.target_type='activity' AND a.id=r.target_id
+         LEFT JOIN users creator ON creator.id=a.creator_id
+         ORDER BY CASE WHEN r.status='open' THEN 0 ELSE 1 END,r.created_at DESC`,
       )
       .all(),
   ),
 );
 app.patch("/api/admin/reports/:id", auth, admin, (req, res) => {
-  db.prepare("UPDATE reports SET status=? WHERE id=?").run(
-    req.body.status === "resolved" ? "resolved" : "dismissed",
-    req.params.id,
-  );
-  db.prepare(
-    "INSERT INTO admin_actions(admin_id,action,target_type,target_id) VALUES(?,?,?,?)",
-  ).run(req.user.id, "处理举报", "report", req.params.id);
-  res.json({ ok: true });
+  const report = db.prepare("SELECT * FROM reports WHERE id=?").get(req.params.id);
+  if (!report) return res.status(404).json({ error: "举报记录不存在" });
+  if (report.status !== "open") return res.status(409).json({ error: "该举报已处理" });
+  if (report.target_type !== "activity") return res.status(400).json({ error: "暂不支持处理此类举报" });
+
+  const decision = req.body.decision;
+  if (!["keep", "remove"].includes(decision))
+    return res.status(400).json({ error: "处理方式必须是 keep（保留）或 remove（下架）" });
+  const adminReason = typeof req.body.reason === "string" ? req.body.reason.trim() : "";
+  if (decision === "remove" && !adminReason)
+    return res.status(400).json({ error: "下架活动必须填写下架理由" });
+  if (adminReason.length > 1000)
+    return res.status(400).json({ error: "处理理由不能超过 1000 字" });
+
+  const activityRow = db.prepare("SELECT id,title,creator_id,status FROM activities WHERE id=?").get(report.target_id);
+  if (!activityRow) return res.status(404).json({ error: "被举报活动不存在" });
+  if (decision === "keep" && activityRow.status === "removed")
+    return res.status(409).json({ error: "该活动已下架，不能将举报处理为保留" });
+
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    const reportStatus = decision === "remove" ? "resolved" : "dismissed";
+    if (decision === "remove") {
+      db.prepare(
+        `UPDATE reports SET status='resolved',decision='remove',admin_reason=?,reviewed_by=?,reviewed_at=CURRENT_TIMESTAMP
+         WHERE target_type='activity' AND target_id=? AND status='open'`,
+      ).run(adminReason, req.user.id, report.target_id);
+    } else {
+      db.prepare(
+        "UPDATE reports SET status=?,decision=?,admin_reason=?,reviewed_by=?,reviewed_at=CURRENT_TIMESTAMP WHERE id=? AND status='open'",
+      ).run(reportStatus, decision, adminReason, req.user.id, report.id);
+    }
+
+    if (decision === "remove" && activityRow.status !== "removed") {
+      db.prepare("UPDATE activities SET status='removed' WHERE id=?").run(activityRow.id);
+      notify(
+        activityRow.creator_id,
+        "活动因举报审核已下架",
+        `你的活动「${activityRow.title}」经管理员审核后已下架。下架理由：${adminReason}`,
+      );
+    }
+
+    db.prepare(
+      "INSERT INTO admin_actions(admin_id,action,target_type,target_id) VALUES(?,?,?,?)",
+    ).run(req.user.id, decision === "remove" ? "审核举报并下架活动" : "审核举报并保留活动", "report", report.id);
+    db.exec("COMMIT");
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
+
+  res.json({
+    ok: true,
+    report: db.prepare("SELECT * FROM reports WHERE id=?").get(report.id),
+    activity_status: decision === "remove" ? "removed" : activityRow.status,
+  });
 });
 app.get("/api/admin/activities", auth, admin, (_, res) =>
   res.json(
@@ -677,13 +735,35 @@ app.get("/api/admin/activities", auth, admin, (_, res) =>
   ),
 );
 app.delete("/api/admin/activities/:id", auth, admin, (req, res) => {
-  db.prepare('UPDATE activities SET status="removed" WHERE id=?').run(
-    req.params.id,
-  );
-  db.prepare(
-    "INSERT INTO admin_actions(admin_id,action,target_type,target_id) VALUES(?,?,?,?)",
-  ).run(req.user.id, "下架活动", "activity", req.params.id);
-  res.json({ ok: true });
+  const activityRow = db.prepare("SELECT id,title,creator_id,status FROM activities WHERE id=?").get(req.params.id);
+  if (!activityRow) return res.status(404).json({ error: "活动不存在" });
+  const reason = typeof req.body?.reason === "string" ? req.body.reason.trim() : "";
+  if (!reason) return res.status(400).json({ error: "下架活动必须填写下架理由" });
+  if (reason.length > 1000) return res.status(400).json({ error: "下架理由不能超过 1000 字" });
+
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    if (activityRow.status !== "removed") {
+      db.prepare("UPDATE activities SET status='removed' WHERE id=?").run(activityRow.id);
+      notify(
+        activityRow.creator_id,
+        "活动因管理员审核已下架",
+        `你的活动「${activityRow.title}」已被管理员下架。下架理由：${reason}`,
+      );
+    }
+    db.prepare(
+      `UPDATE reports SET status='resolved',decision='remove',admin_reason=?,reviewed_by=?,reviewed_at=CURRENT_TIMESTAMP
+       WHERE target_type='activity' AND target_id=? AND status='open'`,
+    ).run(reason, req.user.id, activityRow.id);
+    db.prepare(
+      "INSERT INTO admin_actions(admin_id,action,target_type,target_id) VALUES(?,?,?,?)",
+    ).run(req.user.id, "下架活动", "activity", activityRow.id);
+    db.exec("COMMIT");
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
+  res.json({ ok: true, status: "removed" });
 });
 const uploadDir = path.resolve("server/uploads");
 fs.mkdirSync(uploadDir, { recursive: true });

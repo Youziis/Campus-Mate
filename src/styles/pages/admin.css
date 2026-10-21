@@ -21,3 +21,212 @@
   border: 0;
   border-radius: 0;
 }
+
+.admin-page {
+  display: grid;
+  gap: 22px;
+}
+
+.admin-page .section-heading {
+  align-items: center;
+}
+
+.admin-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--cm-line);
+  border-radius: 16px;
+  color: var(--cm-ink-muted);
+  background: var(--cm-surface);
+}
+
+.admin-summary-count {
+  color: var(--cm-brand);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.admin-panel {
+  overflow: hidden;
+  border: 1px solid var(--cm-line);
+  border-radius: 20px;
+  background: var(--cm-surface);
+}
+
+.admin-panel .panel-heading > div {
+  display: grid;
+  gap: 5px;
+}
+
+.admin-panel .panel-heading p,
+.admin-report-meta,
+.admin-activity-row p,
+.admin-history-row p {
+  margin: 0;
+  color: var(--cm-ink-muted);
+  font-size: 13px;
+}
+
+.report-count {
+  display: inline-grid;
+  min-width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0 8px;
+  border-radius: 99px;
+  color: var(--cm-brand);
+  background: color-mix(in srgb, var(--cm-brand) 10%, white);
+  font-weight: 750;
+}
+
+.admin-report-list,
+.admin-history-list,
+.admin-activity-list {
+  display: grid;
+}
+
+.admin-report-card {
+  display: block;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--cm-line);
+}
+
+.admin-report-content {
+  min-width: 0;
+}
+
+.admin-report-topline,
+.admin-report-actions,
+.admin-activity-row,
+.admin-history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-report-topline {
+  color: var(--cm-ink-muted);
+  font-size: 12px;
+}
+
+.admin-report-tag {
+  color: var(--cm-brand);
+  font-weight: 700;
+}
+
+.admin-report-content h4 {
+  margin: 9px 0 5px;
+  color: var(--cm-ink);
+  font-size: 19px;
+}
+
+.admin-activity-link {
+  color: var(--cm-ink);
+  text-decoration: none;
+  text-underline-offset: 4px;
+}
+
+.admin-activity-link:hover,
+.admin-activity-link:focus-visible {
+  color: var(--cm-brand);
+  text-decoration: underline;
+}
+
+.admin-report-reason {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--cm-surface-muted);
+}
+
+.admin-report-reason b {
+  color: var(--cm-ink);
+  font-size: 13px;
+}
+
+.admin-report-reason p {
+  margin: 5px 0 0;
+  color: var(--cm-ink);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.admin-report-warning {
+  margin: 10px 0 0;
+  color: #b45309;
+  font-size: 13px;
+}
+
+.admin-report-actions {
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.admin-empty {
+  padding: 44px 16px;
+}
+
+.admin-empty p {
+  margin: 0;
+  color: var(--cm-ink-muted);
+}
+
+.admin-activity-row,
+.admin-history-row {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--cm-line);
+}
+
+.admin-activity-row > div,
+.admin-history-row > div {
+  display: grid;
+  gap: 5px;
+}
+
+.admin-history-row > div {
+  min-width: 0;
+}
+
+.admin-history-row p {
+  overflow-wrap: anywhere;
+}
+
+.admin-history-row small {
+  color: var(--cm-ink-muted);
+}
+
+.admin-status,
+.admin-removed-label {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 99px;
+  color: #166534;
+  background: #dcfce7;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-status.remove,
+.admin-removed-label {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.admin-list-empty {
+  padding: 24px;
+  color: var(--cm-ink-muted);
+  text-align: center;
+}
+
+@media (max-width: 680px) {
+  .admin-report-card {
+    padding: 16px;
+  }
+
+  .admin-history-row {
+    align-items: flex-start;
+  }
+}

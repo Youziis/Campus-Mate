@@ -178,6 +178,21 @@ db.exec(`
   );
 `);
 
+// 举报审核结果与下架理由，给旧数据库补列以兼容现有项目数据。
+const reportColumns = db.prepare("PRAGMA table_info(reports)").all();
+if (!reportColumns.some((column) => column.name === "decision")) {
+  db.exec("ALTER TABLE reports ADD COLUMN decision TEXT DEFAULT ''");
+}
+if (!reportColumns.some((column) => column.name === "admin_reason")) {
+  db.exec("ALTER TABLE reports ADD COLUMN admin_reason TEXT DEFAULT ''");
+}
+if (!reportColumns.some((column) => column.name === "reviewed_by")) {
+  db.exec("ALTER TABLE reports ADD COLUMN reviewed_by INTEGER REFERENCES users(id)");
+}
+if (!reportColumns.some((column) => column.name === "reviewed_at")) {
+  db.exec("ALTER TABLE reports ADD COLUMN reviewed_at TEXT");
+}
+
 const userColumns = db.prepare("PRAGMA table_info(users)").all();
 if (!userColumns.some((column) => column.name === "contact")) {
   db.exec("ALTER TABLE users ADD COLUMN contact TEXT DEFAULT ''");

@@ -431,14 +431,86 @@ async function uploadAvatar(event) {
   }
 }
 
-async function reportAction(item, status) {
-  try { await api(`/admin/reports/${item.id}`, { method: "PATCH", body: JSON.stringify({ status }) }); item.status = status; }
-  catch (error) { showError(error); }
+async function reportAction(item, decision) {
+  try {
+    let reason = "";
+    if (decision === "remove") {
+      const result = await ElMessageBox.prompt(
+        `请填写下架「${item.activity_title || `活动 #${item.target_id}`}」的理由，该理由会通过站内通知发送给活动发起人。`,
+        "下架活动",
+        {
+          inputType: "textarea",
+          inputPlaceholder: "说明违反的规则或下架原因",
+          inputValidator: (value) => Boolean(value?.trim()) || "下架理由不能为空",
+          inputErrorMessage: "下架理由不能为空",
+          confirmButtonText: "确认下架",
+          cancelButtonText: "取消",
+          type: "warning",
+        },
+      );
+      reason = result.value.trim();
+    }
+
+    const response = await api(`/admin/reports/${item.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ decision, reason }),
+    });
+    if (decision === "remove") {
+      reports.value
+        .filter((report) => report.target_type === "activity" && report.target_id === item.target_id && report.status === "open")
+        .forEach((report) => Object.assign(report, {
+          status: response.report.status,
+          decision: response.report.decision,
+          admin_reason: response.report.admin_reason,
+          reviewed_by: response.report.reviewed_by,
+          reviewed_at: response.report.reviewed_at,
+        }));
+    } else {
+      Object.assign(item, response.report);
+    }
+    if (decision === "remove") {
+      const activity = adminActivities.value.find((entry) => entry.id === item.target_id);
+      if (activity) activity.status = "removed";
+      ElMessage.success("活动已下架，发起人已收到通知");
+    } else {
+      ElMessage.success("举报已审核，活动予以保留");
+    }
+  } catch (error) {
+    if (error !== "cancel" && error !== "close") showError(error);
+  }
 }
 
 async function adminRemove(activity) {
-  try { await api(`/admin/activities/${activity.id}`, { method: "DELETE" }); activity.status = "removed"; }
-  catch (error) { showError(error); }
+  try {
+    const result = await ElMessageBox.prompt(
+      `请填写下架「${activity.title}」的理由，该理由会通过站内通知发送给活动发起人。`,
+      "下架活动",
+      {
+        inputType: "textarea",
+        inputPlaceholder: "说明违反的规则或下架原因",
+        inputValidator: (value) => Boolean(value?.trim()) || "下架理由不能为空",
+        inputErrorMessage: "下架理由不能为空",
+        confirmButtonText: "确认下架",
+        cancelButtonText: "取消",
+        type: "warning",
+      },
+    );
+    await api(`/admin/activities/${activity.id}`, {
+      method: "DELETE",
+      body: JSON.stringify({ reason: result.value.trim() }),
+    });
+    activity.status = "removed";
+    reports.value
+      .filter((report) => report.target_type === "activity" && report.target_id === activity.id && report.status === "open")
+      .forEach((report) => Object.assign(report, {
+        status: "resolved",
+        decision: "remove",
+        admin_reason: result.value.trim(),
+      }));
+    ElMessage.success("活动已下架，发起人已收到通知");
+  } catch (error) {
+    if (error !== "cancel" && error !== "close") showError(error);
+  }
 }
 
 async function reviewMember(activityId, reviewee) {
