@@ -149,3 +149,91 @@
 .applicants-dialog .applicant-info { min-width: 130px; overflow-wrap: anywhere; }
 .applicants-dialog .applicant-organizer { flex-wrap: wrap; }
 
+/* Readable typography and consistent controls in the applicant management dialog. */
+.applicants-dialog .applicant-row {
+  align-items: center;
+  gap: 12px;
+  padding: 18px 0;
+}
+
+.applicants-dialog .applicant-info b {
+  color: var(--cm-ink);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.applicants-dialog .applicant-info small,
+.applicants-dialog .applicant-info p {
+  color: var(--cm-ink-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.applicants-dialog .applicant-info p {
+  margin: 7px 0;
+}
+
+.applicants-dialog .applicant-info .applicant-contact {
+  color: var(--cm-ink);
+  font-size: 13px;
+}
+
+.applicants-dialog .status {
+  flex: 0 0 auto;
+  display: inline-flex;
+  min-width: 72px;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 11px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.applicants-dialog .applicant-status--pending {
+  color: #8b672f;
+  background: #fff2d6;
+}
+
+.applicants-dialog .applicant-status--approved {
+  color: var(--cm-success);
+  background: #e4f6ef;
+}
+
+.applicants-dialog .applicant-status--rejected {
+  color: var(--cm-danger);
+  background: #fce8eb;
+}
+
+.applicants-dialog .el-button {
+  min-height: 38px;
+  height: auto;
+  padding: 9px 15px;
+  border-radius: 11px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.applicants-dialog .el-button + .el-button {
+  margin-left: 0;
+}
+
+.applicants-dialog .applicant-organizer .el-button {
+  min-height: 38px;
+}
+
+@media (max-width: 640px) {
+  .applicants-dialog .applicant-row {
+    align-items: flex-start;
+  }
+
+  .applicants-dialog .applicant-row .el-button {
+    min-height: 40px;
+  }
+}
+

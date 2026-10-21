@@ -33,7 +33,7 @@ async function copyContact(contact) {
     <div v-for="application in members" :key="application.id" class="applicant-row">
       <span class="avatar">{{ application.name?.[0] }}</span>
       <div class="applicant-info"><b>{{ application.name }}</b><small>{{ application.major || "同学" }} · {{ application.year || "" }}</small><p>{{ application.message || "期待一起参加" }}</p><small v-if="application.status === 'approved'" class="applicant-contact">{{ application.contact || "未填写联系方式" }}</small></div>
-      <span class="status" :class="application.status">{{ application.status === "pending" ? "待审核" : application.status === "approved" ? "已通过" : "未通过" }}</span>
+      <span class="status" :class="`applicant-status--${application.status}`">{{ application.status === "pending" ? "待审核" : application.status === "approved" ? "已通过" : "未通过" }}</span>
       <el-button v-if="application.status === 'approved' && application.contact" size="small" @click="copyContact(application.contact)">复制联系方式</el-button>
       <template v-if="managing && application.status === 'pending'"><el-button size="small" type="primary" @click="store.reviewApp(application, 'approved')">通过</el-button><el-button size="small" @click="store.reviewApp(application, 'rejected')">拒绝</el-button></template>
     </div>
