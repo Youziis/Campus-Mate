@@ -193,6 +193,11 @@ if (!reportColumns.some((column) => column.name === "reviewed_at")) {
   db.exec("ALTER TABLE reports ADD COLUMN reviewed_at TEXT");
 }
 
+const notificationColumns = db.prepare("PRAGMA table_info(notifications)").all();
+if (!notificationColumns.some((column) => column.name === "action_url")) {
+  db.exec("ALTER TABLE notifications ADD COLUMN action_url TEXT DEFAULT ''");
+}
+
 const userColumns = db.prepare("PRAGMA table_info(users)").all();
 if (!userColumns.some((column) => column.name === "contact")) {
   db.exec("ALTER TABLE users ADD COLUMN contact TEXT DEFAULT ''");
@@ -230,8 +235,8 @@ db.exec(`
 `);
 
 // 创建站内通知，供报名、审核和活动状态变更接口共用。
-export function notify(userId, title, body) {
+export function notify(userId, title, body, actionUrl = "") {
   db.prepare(
-    "INSERT INTO notifications(user_id, title, body) VALUES (?, ?, ?)",
-  ).run(userId, title, body);
+    "INSERT INTO notifications(user_id, title, body, action_url) VALUES (?, ?, ?, ?)",
+  ).run(userId, title, body, actionUrl);
 }

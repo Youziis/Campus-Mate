@@ -9,6 +9,7 @@
   text-align: left;
   border: 0;
   background: transparent;
+  cursor: pointer;
 }
 
 .notification-row {
@@ -64,6 +65,13 @@
 .notification-copy small {
   color: #8a958f;
   font-size: 9px;
+}
+
+.notification-copy .notification-action {
+  margin-top: 7px;
+  color: var(--cm-brand);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .notification-list i {

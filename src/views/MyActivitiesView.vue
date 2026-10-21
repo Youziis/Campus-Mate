@@ -1,20 +1,33 @@
 <script setup>
 import { computed, onMounted, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import ActivityCard from "../components/ActivityCard.vue";
 import ParticipationList from "../components/ParticipationList.vue";
 import { formatDate, useCampus } from "../stores/campus";
 
 const route = useRoute();
+const router = useRouter();
 const store = useCampus();
 const favoritesMode = computed(() => route.name === "favorites");
 
 async function loadPage() {
   if (favoritesMode.value) await store.loadFavorites();
-  else await store.loadMine();
+  else {
+    await store.loadMine();
+    if (route.query.manage) {
+      store.activeTab.value = "activities";
+      const activity = store.myActivities.value.find(
+        (item) => Number(item.id) === Number(route.query.manage),
+      );
+      if (activity) {
+        await store.openApplicants(activity);
+        await router.replace({ name: "my-activities" });
+      }
+    }
+  }
 }
 onMounted(loadPage);
-watch(() => route.name, loadPage);
+watch(() => [route.name, route.query.manage], loadPage);
 </script>
 
 <template>

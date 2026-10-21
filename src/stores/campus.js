@@ -375,6 +375,22 @@ async function markRead(notification) {
   catch (error) { showError(error); }
 }
 
+async function openNotification(notification) {
+  await markRead(notification);
+  let target = notification.action_url;
+
+  // Older application notifications predate action_url; resolve their activity by title.
+  if (!target && notification.title === "收到新的报名") {
+    await loadMine();
+    const activity = myActivities.value.find((item) =>
+      notification.body?.includes(`「${item.title}」`),
+    );
+    if (activity) target = `/my/activities?tab=activities&manage=${activity.id}`;
+  }
+
+  if (target) await router.push(target);
+}
+
 async function markAllRead() {
   try { await api("/notifications/read-all", { method: "POST" }); notifications.value.forEach((item) => (item.read = 1)); }
   catch (error) { showError(error); }
@@ -558,7 +574,7 @@ const campus = {
   initialize, load, search, login, logout, openDetail, loadActivity, toggleFavorite,
   join, newActivity, editActivity, saveActivity, loadMine, loadFavorites, loadProfile,
   loadAdmin, openApplicants, reviewApp, withdraw, cancel, toggleAvailability,
-  saveProfile, markRead, markAllRead, deleteNotification, report, recommend, uploadImage, uploadAvatar, reportAction,
+  saveProfile, markRead, openNotification, markAllRead, deleteNotification, report, recommend, uploadImage, uploadAvatar, reportAction,
   adminRemove, reviewMember, showMembers, copyOrganizerContact,
 };
 

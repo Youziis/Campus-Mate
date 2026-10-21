@@ -15,9 +15,9 @@ const editing = ref(false);
     </div>
     <div class="notification-list motion-item">
       <article v-for="notification in store.notifications.value" :key="notification.id" class="notification-row" :class="{ unread: !notification.read }">
-        <button class="notification-main" type="button" @click="store.markRead(notification)">
+        <button class="notification-main" type="button" @click="store.openNotification(notification)">
           <span class="notif-icon">✦</span>
-          <span class="notification-copy"><b>{{ notification.title }}</b><span>{{ notification.body }}</span><small>{{ new Date(notification.created_at + 'Z').toLocaleString('zh-CN') }}</small></span>
+          <span class="notification-copy"><b>{{ notification.title }}</b><span>{{ notification.body }}</span><small>{{ new Date(notification.created_at + 'Z').toLocaleString('zh-CN') }}</small><small v-if="notification.action_url || notification.title === '收到新的报名'" class="notification-action">点击前往审核报名 →</small></span>
           <i v-if="!notification.read"></i>
         </button>
         <el-button v-if="editing" text type="danger" :loading="notification.deleting" :aria-label="`删除通知：${notification.title}`" @click="store.deleteNotification(notification)">删除</el-button>

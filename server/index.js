@@ -381,6 +381,7 @@ app.post("/api/activities/:id/applications", auth, (req, res) => {
       a.creator_id,
       "收到新的报名",
       `${req.user.name} 报名了「${a.title}」`,
+      `/my/activities?tab=activities&manage=${a.id}`,
     );
     res.status(201).json({ ok: true, status: "pending" });
   } catch {
