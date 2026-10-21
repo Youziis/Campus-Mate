@@ -417,37 +417,46 @@
 
 ## 6. 评价、推荐与通知
 
-### 6.1 `POST /api/activities/:id/reviews` — 提交活动评价
+### 6.1 `GET /api/activities/:id/review-members` — 获取可评价成员
 
-**权限：** 已通过成员
+**权限：** 登录；只能由活动组织者或已通过审核的成员访问，且活动必须结束。
 
-**参数：** Path：`id`（活动 ID）；Header：Bearer Token；JSON Body：
+**参数：** Path `id`（活动 ID）；Header `Bearer Token`。
+
+**返回结果（200）：** 同场其他参与者数组，包含用户资料、`is_organizer`，以及当前评价者是否已评价的 `review_id`、`review_rating`、`review_comment`（未评价时不返回这些字段）。当前用户本人不会出现在列表中。
+
+**错误代码：** `400` 活动尚未结束或已取消/下架；`401` 未登录；`403` 不是组织者或已通过成员；`404` 活动不存在。
+
+### 6.2 `POST /api/activities/:id/reviews` — 提交活动互评
+
+**权限：** 登录；活动组织者或已通过审核的成员。
+
+**参数：** Path `id`（活动 ID）；Header `Bearer Token`；JSON Body：
 
 ```json
 {
   "reviewee_id": 2,
   "rating": 5,
-  "comment": "友善守时，活动体验很好"
+  "comment": "友善守时，这次同行体验很好"
 }
 ```
 
-`rating` 范围为 1 至 5；`comment` 可省略。评价者和被评价者必须都是该活动已通过成员，且不能评价自己。活动开始前不能评价。
+`rating` 必须是 1 到 5 的整数；`comment` 可省略，最多 500 字。活动结束后，组织者与已通过成员可以评价同场的其他人；不能评价自己。每位评价者在同一活动中对同一位成员只能评价一次。
 
-**返回结果（201）：** `{ "ok": true }`。
+**返回结果（201）：** `{ "ok": true, "review": { "id": 15, "rating": 5, "comment": "友善守时，这次同行体验很好" } }`。
 
-**报错代码：** `400` 活动不存在或活动尚未开始；`401` 未登录；`403` 不是活动成员或试图评价自己；`409` 已评价过或评分值违反数据库约束。
-
-### 6.2 `GET /api/users/:id/reviews` — 获取用户评价
+**错误代码：** `400` 活动尚未结束、活动已取消/下架或参数不合法；`401` 未登录；`403` 无互评资格或试图评价自己；`404` 活动不存在；`409` 已评价过该成员。
+### 6.3 `GET /api/users/:id/reviews` — 获取用户评价
 
 **权限：** 登录
 
 **参数：** Path：`id`（用户 ID）；Header：Bearer Token。
 
-**返回结果（200）：** 评价数组，每项包含评价表字段和 `reviewer_name`。
+**返回结果（200）：** 评价数组，每项包含评价表字段、`reviewer_name` 和 `activity_title`。
 
 **报错代码：** `401` 未登录。
 
-### 6.3 `GET /api/recommendations` — 获取个性化推荐
+### 6.4 `GET /api/recommendations` — 获取个性化推荐
 
 **权限：** 登录
 
@@ -457,7 +466,7 @@
 
 **报错代码：** `401` 未登录。
 
-### 6.4 `GET /api/notifications` — 获取我的通知
+### 6.5 `GET /api/notifications` — 获取我的通知
 
 **权限：** 登录
 
@@ -467,7 +476,7 @@
 
 **报错代码：** `401` 未登录。
 
-### 6.5 `PATCH /api/notifications/:id/read` — 标记单条通知已读
+### 6.6 `PATCH /api/notifications/:id/read` — 标记单条通知已读
 
 **权限：** 登录
 
@@ -477,7 +486,7 @@
 
 **报错代码：** `401` 未登录。若通知不属于当前用户或不存在，接口仍返回成功，但不会更新记录。
 
-### 6.6 `POST /api/notifications/read-all` — 全部标记已读
+### 6.7 `POST /api/notifications/read-all` — 全部标记已读
 
 **权限：** 登录
 

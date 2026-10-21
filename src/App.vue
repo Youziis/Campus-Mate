@@ -6,6 +6,7 @@ import AppFooter from "./components/layout/AppFooter.vue";
 import AuthDialog from "./components/dialogs/AuthDialog.vue";
 import ActivityDialog from "./components/dialogs/ActivityDialog.vue";
 import ApplicantsDialog from "./components/dialogs/ApplicantsDialog.vue";
+import ActivityReviewDialog from "./components/dialogs/ActivityReviewDialog.vue";
 import CancellationDialog from "./components/dialogs/CancellationDialog.vue";
 import RadialMenu from "./components/RadialMenu.vue";
 import { usePageMotion } from "./composables/usePageMotion";
@@ -46,6 +47,7 @@ onMounted(async () => {
     <AuthDialog />
     <ActivityDialog />
     <ApplicantsDialog />
+    <ActivityReviewDialog />
     <CancellationDialog />
   </div>
 </template>

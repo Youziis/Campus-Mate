@@ -1,14 +1,14 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { coverStyle, formatDate, iconFor, useCampus } from "../stores/campus";
+import { coverStyle, formatDate, hasActivityEnded, iconFor, useCampus } from "../stores/campus";
 const store = useCampus();
 const router = useRouter();
 const filter = ref("all");
 const filters = [{ key: "all", label: "全部报名" }, { key: "approved", label: "已通过" }, { key: "pending", label: "待审核" }, { key: "rejected", label: "未通过" }];
 const count = (key) => store.myApplications.value.filter((item) => key === "all" || item.status === key).length;
 const items = computed(() => store.myApplications.value.filter((item) => filter.value === "all" || item.status === filter.value));
-function ended(item) { return item.activity_status === "completed" || (item.ends_at && Date.parse(item.ends_at) <= Date.now()); }
+function ended(item) { return hasActivityEnded({ ...item, status: item.activity_status }); }
 function cancelled(item) { return ["cancelled", "removed"].includes(item.activity_status); }
 function statusText(item) {
   if (cancelled(item)) return "活动已取消";
@@ -46,7 +46,7 @@ function guidance(item) {
           <p class="participation-guidance">{{ guidance(item) }}</p>
           <footer>
             <el-button type="primary" plain @click="store.openDetail(item)">查看详情</el-button>
-            <el-button v-if="item.status === 'approved' && ended(item) && !cancelled(item) && item.creator_id !== store.user.value?.id" @click="store.reviewMember(item.id, item.creator_id)">评价搭子</el-button>
+            <el-button v-if="item.status === 'approved' && ended(item) && !cancelled(item) && item.creator_id !== store.user.value?.id" @click="store.openReview(item)">评价同行者</el-button>
             <el-button v-if="['pending','approved'].includes(item.status) && !ended(item) && !cancelled(item) && item.creator_id !== store.user.value?.id" text type="danger" @click="store.withdraw(item)">{{ item.status === 'pending' ? '撤回申请' : '退出活动' }}</el-button>
           </footer>
         </div>

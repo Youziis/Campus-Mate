@@ -524,46 +524,85 @@ app.get("/api/activities/:id/contact", auth, (req, res) => {
 });
 
 // 评价只能在活动开始后由已通过的活动成员互相提交。
-app.post("/api/activities/:id/reviews", auth, (req, res) => {
-  const a = db
-    .prepare("SELECT * FROM activities WHERE id=?")
-    .get(req.params.id);
-  if (!a || new Date(a.starts_at) > new Date())
+function activityHasEnded(activity) {
+  const endTime = activity.ends_at || activity.starts_at;
+  return activity.status === "completed" || Boolean(endTime && Date.parse(endTime) <= Date.now());
+}
+
+function activityParticipants(activityId, creatorId) {
+  const creator = db
+    .prepare("SELECT id,name,avatar,major,year FROM users WHERE id=?")
+    .get(creatorId);
+  const approved = db
+    .prepare("SELECT DISTINCT u.id,u.name,u.avatar,u.major,u.year FROM applications x JOIN users u ON u.id=x.user_id WHERE x.activity_id=? AND x.status='approved'")
+    .all(activityId);
+  const participants = new Map();
+  if (creator) participants.set(Number(creator.id), { ...creator, is_organizer: true });
+  for (const member of approved) {
+    if (!participants.has(Number(member.id))) {
+      participants.set(Number(member.id), { ...member, is_organizer: false });
+    }
+  }
+  return [...participants.values()];
+}
+
+// 活动结束后，组织者与已通过成员可以评价同场的其他参与者。
+app.get("/api/activities/:id/review-members", auth, (req, res) => {
+  const event = db.prepare("SELECT * FROM activities WHERE id=?").get(req.params.id);
+  if (!event) return res.sendStatus(404);
+  if (["cancelled", "removed"].includes(event.status) || !activityHasEnded(event))
     return res.status(400).json({ error: "活动结束后才能评价" });
-  const peer = Number(req.body.reviewee_id);
-  const allowed =
-    db
-      .prepare(
-        "SELECT 1 FROM applications WHERE activity_id=? AND user_id=? AND status='approved'",
-      )
-      .get(a.id, req.user.id) &&
-    db
-      .prepare(
-        "SELECT 1 FROM applications WHERE activity_id=? AND user_id=? AND status='approved'",
-      )
-      .get(a.id, peer);
-  if (!allowed || peer === req.user.id)
-    return res.status(403).json({ error: "仅活动成员可以互相评价" });
+
+  const participants = activityParticipants(event.id, event.creator_id);
+  if (!participants.some((member) => Number(member.id) === Number(req.user.id)))
+    return res.status(403).json({ error: "仅活动组织者和已通过成员可以评价" });
+
+  const peers = participants.filter((member) => Number(member.id) !== Number(req.user.id));
+  const existing = db
+    .prepare("SELECT id,reviewee_id,rating,comment FROM reviews WHERE activity_id=? AND reviewer_id=?")
+    .all(event.id, req.user.id);
+  const byReviewee = new Map(existing.map((review) => [Number(review.reviewee_id), review]));
+  res.json(peers.map((member) => ({ ...member, ...(byReviewee.get(Number(member.id)) ? {
+    review_id: byReviewee.get(Number(member.id)).id,
+    review_rating: byReviewee.get(Number(member.id)).rating,
+    review_comment: byReviewee.get(Number(member.id)).comment,
+  } : {}) })));
+});
+
+app.post("/api/activities/:id/reviews", auth, (req, res) => {
+  const event = db.prepare("SELECT * FROM activities WHERE id=?").get(req.params.id);
+  if (!event) return res.sendStatus(404);
+  if (["cancelled", "removed"].includes(event.status) || !activityHasEnded(event))
+    return res.status(400).json({ error: "活动结束后才能评价" });
+
+  const peerId = Number(req.body.reviewee_id);
+  const rating = Number(req.body.rating);
+  const comment = String(req.body.comment || "").trim();
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5)
+    return res.status(400).json({ error: "评分必须是1到5的整数" });
+  if (comment.length > 500)
+    return res.status(400).json({ error: "评价内容不能超过500字" });
+
+  const participants = activityParticipants(event.id, event.creator_id);
+  const isParticipant = participants.some((member) => Number(member.id) === Number(req.user.id));
+  const isPeer = participants.some((member) => Number(member.id) === peerId);
+  if (!isParticipant || !isPeer || peerId === Number(req.user.id))
+    return res.status(403).json({ error: "仅活动组织者和已通过成员可以评价其他参与者" });
+
   try {
-    db.prepare(
+    const result = db.prepare(
       "INSERT INTO reviews(activity_id,reviewer_id,reviewee_id,rating,comment) VALUES(?,?,?,?,?)",
-    ).run(
-      a.id,
-      req.user.id,
-      peer,
-      Math.min(5, Math.max(1, Number(req.body.rating))),
-      req.body.comment || "",
-    );
-    res.status(201).json({ ok: true });
+    ).run(event.id, req.user.id, peerId, rating, comment);
+    res.status(201).json({ ok: true, review: { id: Number(result.lastInsertRowid), rating, comment } });
   } catch {
-    res.status(409).json({ error: "已经评价过该成员" });
+    res.status(409).json({ error: "你已经评价过这位活动成员" });
   }
 });
 app.get("/api/users/:id/reviews", auth, (req, res) =>
   res.json(
     db
       .prepare(
-        "SELECT r.*,u.name reviewer_name FROM reviews r JOIN users u ON u.id=r.reviewer_id WHERE r.reviewee_id=? ORDER BY r.created_at DESC",
+        "SELECT r.*,u.name reviewer_name,a.title activity_title FROM reviews r JOIN users u ON u.id=r.reviewer_id LEFT JOIN activities a ON a.id=r.activity_id WHERE r.reviewee_id=? ORDER BY r.created_at DESC",
       )
       .all(req.params.id),
   ),

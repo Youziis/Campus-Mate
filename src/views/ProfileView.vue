@@ -70,6 +70,17 @@ onUnmounted(() => motionContext?.revert());
         <div class="profile-stat-card rating"><span>04</span><div><b>{{ store.stats.value.averageRating || "—" }}</b><small>搭子评分</small></div><i>★ 5.0</i></div>
       </section>
 
+      <section class="profile-reviews" aria-labelledby="profile-reviews-title">
+        <div class="profile-reviews-heading"><div><span>FEEDBACK</span><h2 id="profile-reviews-title">收到的评价</h2></div><small>{{ store.reviews.value.length }} 条</small></div>
+        <div v-if="store.reviews.value.length" class="profile-review-list">
+          <article v-for="review in store.reviews.value" :key="review.id" class="profile-review-card">
+            <div class="profile-review-top"><b>{{ review.reviewer_name }}</b><el-rate :model-value="review.rating" disabled /><time>{{ review.created_at }}</time></div>
+            <p>{{ review.comment || "留下了评分" }}</p>
+            <small v-if="review.activity_title">来自活动：{{ review.activity_title }}</small>
+          </article>
+        </div>
+        <p v-else class="profile-reviews-empty">活动结束后，你的同行者可以在这里留下评分和体验。</p>
+      </section>
       <div class="profile-workspace">
         <main class="profile-editor">
           <div class="profile-editor-head"><div><div class="eyebrow muted">编辑个人档案</div><h2>把你介绍得刚刚好</h2><p>公开信息会帮助活动发起人了解你，空闲时间仅用于活动推荐。</p></div><span>PUBLIC PROFILE</span></div>
@@ -112,3 +123,18 @@ onUnmounted(() => motionContext?.revert());
 </template>
 
 <style src="../styles/pages/profile.css"></style>
+<style scoped>
+.profile-reviews { margin: 26px 0 34px; padding: 24px; border: 1px solid var(--cm-line); border-radius: 18px; background: var(--cm-surface); }
+.profile-reviews-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
+.profile-reviews-heading span { color: var(--cm-ink-muted); font-size: 11px; letter-spacing: .14em; }
+.profile-reviews-heading h2 { margin: 5px 0 0; font-size: 22px; }
+.profile-reviews-heading > small, .profile-review-card > small, .profile-review-top time { color: var(--cm-ink-muted); }
+.profile-review-list { display: grid; gap: 12px; }
+.profile-review-card { padding: 16px; border-radius: 12px; background: var(--cm-canvas); }
+.profile-review-top { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.profile-review-top time { margin-left: auto; font-size: 12px; }
+.profile-review-card p { margin: 10px 0 6px; line-height: 1.65; overflow-wrap: anywhere; }
+.profile-review-card > small { font-size: 12px; }
+.profile-reviews-empty { margin: 0; padding: 16px; border-radius: 10px; color: var(--cm-ink-muted); background: var(--cm-canvas); }
+@media (max-width: 560px) { .profile-reviews { padding: 18px; } .profile-review-top time { width: 100%; margin-left: 0; } }
+</style>

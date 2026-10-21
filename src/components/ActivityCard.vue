@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { coverStyle, formatDate, iconFor, useCampus } from "../stores/campus";
+import { coverStyle, formatDate, hasActivityEnded, iconFor, useCampus } from "../stores/campus";
 
 defineProps({ activity: { type: Object, required: true }, featured: Boolean, manageable: Boolean, favoriteMode: Boolean });
 const store = useCampus();
@@ -27,7 +27,7 @@ const failedAvatar = ref("");
         </span>
         <span class="member-count">{{ activity.member_count }} / {{ activity.capacity }} 人</span>
       </div>
-      <div v-if="manageable" class="inline-actions" @click.stop><el-button size="small" @click="store.openApplicants(activity)">报名管理 <span v-if="activity.pending_count" class="pending">{{ activity.pending_count }}</span></el-button><el-button size="small" @click="store.editActivity(activity)">编辑</el-button><el-button size="small" type="danger" plain @click="store.cancel(activity)">取消</el-button></div>
+      <div v-if="manageable" class="inline-actions" @click.stop><el-button v-if="hasActivityEnded(activity) && !['cancelled','removed'].includes(activity.status)" size="small" type="primary" plain @click="store.openReview(activity)">评价同行者</el-button><el-button size="small" @click="store.openApplicants(activity)">报名管理 <span v-if="activity.pending_count" class="pending">{{ activity.pending_count }}</span></el-button><el-button size="small" @click="store.editActivity(activity)">编辑</el-button><el-button size="small" type="danger" plain @click="store.cancel(activity)">取消</el-button></div>
     </div>
   </article>
 </template>

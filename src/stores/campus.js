@@ -43,6 +43,10 @@ const adminActivities = ref([]);
 const profile = ref({});
 const availability = ref([]);
 const reviews = ref([]);
+const reviewDialogOpen = ref(false);
+const reviewActivity = ref(null);
+const reviewMembers = ref([]);
+const reviewSubmittingId = ref(null);
 const activeTab = ref("activities");
 const authForm = ref({ email: "", password: "", name: "" });
 
@@ -86,6 +90,13 @@ export function formatDate(value, includeTime = false) {
     ? { month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit" }
     : { month: "long", day: "numeric", weekday: "short" };
   return activityDate(value).toLocaleString("zh-CN", { ...options, timeZone: "Asia/Shanghai" });
+}
+
+export function hasActivityEnded(activity) {
+  if (!activity) return false;
+  if (activity.status === "completed" || activity.activity_status === "completed") return true;
+  const end = activity.ends_at || activity.starts_at;
+  return Boolean(end && Date.parse(end) <= Date.now());
 }
 
 export function iconFor(categoryName) {
@@ -284,7 +295,11 @@ async function loadProfile() {
   if (!user.value) await load();
   if (!user.value) return;
   try {
-    [profile.value, availability.value] = await Promise.all([api(`/users/${user.value.id}`), api("/users/me/availability")]);
+    [profile.value, availability.value, reviews.value] = await Promise.all([
+      api(`/users/${user.value.id}`),
+      api("/users/me/availability"),
+      api(`/users/${user.value.id}/reviews`),
+    ]);
     availability.value = availability.value.flatMap((item) => {
       const replacements = legacyPeriodMap[item.period];
       return replacements
@@ -538,14 +553,36 @@ async function adminRemove(activity) {
   }
 }
 
-async function reviewMember(activityId, reviewee) {
+async function openReview(activity) {
+  if (!token.value) return (showAuth.value = true);
   try {
-    const { value } = await ElMessageBox.prompt("写一句活动体验评价", "活动评价", { inputPlaceholder: "友善、守时、相处愉快…" });
-    await api(`/activities/${activityId}/reviews`, { method: "POST", body: JSON.stringify({ reviewee_id: reviewee, rating: 5, comment: value || "" }) });
-    ElMessage.success("评价已提交");
-  } catch (error) { if (error !== "cancel") showError(error); }
+    reviewActivity.value = activity;
+    reviewMembers.value = (await api(`/activities/${activity.id}/review-members`)).map((member) => ({
+      ...member,
+      draftRating: 5,
+      draftComment: "",
+    }));
+    reviewDialogOpen.value = true;
+  } catch (error) { showError(error); }
 }
 
+async function submitReview(member) {
+  if (reviewSubmittingId.value || member.review_id) return;
+  reviewSubmittingId.value = member.id;
+  try {
+    const result = await api(`/activities/${reviewActivity.value.id}/reviews`, {
+      method: "POST",
+      body: JSON.stringify({ reviewee_id: member.id, rating: member.draftRating, comment: member.draftComment }),
+    });
+    Object.assign(member, {
+      review_id: result.review.id,
+      review_rating: result.review.rating,
+      review_comment: result.review.comment,
+    });
+    ElMessage.success("评价已提交");
+  } catch (error) { showError(error); }
+  finally { reviewSubmittingId.value = null; }
+}
 async function showMembers() {
   if (selected.value?.creator_id === user.value?.id) return openApplicants(selected.value);
   try {
@@ -571,11 +608,12 @@ const campus = {
   showAuth, authMode, busy, avatarUploading, loading, loadError, activityDialogOpen, applicantsOpen,
   editing, form, applications, memberOrganizer, myApplications, myActivities, favoriteList, reports,
   adminActivities, profile, availability, reviews, activeTab, authForm, unreadCount,
+  reviewDialogOpen, reviewActivity, reviewMembers, reviewSubmittingId,
   initialize, load, search, login, logout, openDetail, loadActivity, toggleFavorite,
   join, newActivity, editActivity, saveActivity, loadMine, loadFavorites, loadProfile,
   loadAdmin, openApplicants, reviewApp, withdraw, cancel, toggleAvailability,
   saveProfile, markRead, openNotification, markAllRead, deleteNotification, report, recommend, uploadImage, uploadAvatar, reportAction,
-  adminRemove, reviewMember, showMembers, copyOrganizerContact,
+  adminRemove, openReview, submitReview, showMembers, copyOrganizerContact,
 };
 
 export function useCampus() {
