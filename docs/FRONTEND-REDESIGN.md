@@ -54,6 +54,18 @@ enforces ownership; successful deletion removes the local row and updates the
 computed unread badge. Failures retain the notification. Multiline cancellation
 announcements preserve line breaks.
 
+## Approved application notification navigation
+
+Notifications load from GET /api/notifications and open through
+PATCH /api/notifications/:id/read. A new “报名已通过” notification carries an
+`action_url` to `/activities/:id`; opening it navigates to that activity detail.
+The detail page preserves GET /api/activities/:id and its “成员与信息” action,
+which loads GET /api/activities/:id/contact for approved members. Older approval
+notifications without an `action_url` resolve the activity from
+GET /api/users/me/applications; ambiguous or missing matches navigate to the
+“我参加的” tab. The notification row labels this action as viewing activity and
+companions. Build and API regression pass.
+
 ## Activity cancellation form
 
 The hosted activity card's cancel action now opens CancellationDialog. It requires

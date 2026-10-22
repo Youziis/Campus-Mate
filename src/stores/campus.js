@@ -403,6 +403,22 @@ async function openNotification(notification) {
     if (activity) target = `/my/activities?tab=activities&manage=${activity.id}`;
   }
 
+  // 兼容旧的通过通知：在当前用户报名记录中查找对应活动。
+  if (!target && notification.title === "报名已通过") {
+    try {
+      const records = await api("/users/me/applications");
+      const matches = records.filter((item) =>
+        notification.body === `你申请参加的「${item.title}」审核结果已更新`,
+      );
+      if (matches.length === 1) target = `/activities/${matches[0].id}`;
+      else {
+        ElMessage.info("无法定位原活动，请在我的报名中查看");
+        activeTab.value = "applications";
+        target = "/my/activities?tab=applications";
+      }
+    } catch (error) { showError(error); return; }
+  }
+
   if (target) await router.push(target);
 }
 

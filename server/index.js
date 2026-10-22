@@ -431,6 +431,7 @@ app.patch("/api/applications/:id", auth, (req, res) => {
     x.user_id,
     req.body.status === "approved" ? "报名已通过" : "报名未通过",
     `你申请参加的「${x.title}」审核结果已更新`,
+    req.body.status === "approved" ? `/activities/${x.activity_id}` : "",
   );
   res.json({ ok: true });
 });

@@ -90,6 +90,14 @@ test("core campus activity flow respects login, approval, privacy and admin acce
       200,
     );
     assert.equal((await call(`/activities/${a.id}/contact`, mei)).status, 200);
+    const approvalNotice = (await (await call("/notifications", mei)).json())
+      .find((item) => item.title === "报名已通过" && item.action_url === `/activities/${a.id}`);
+    assert.ok(approvalNotice, "通过通知应指向对应活动详情");
+    const approvedDetail = await (await call(approvalNotice.action_url, mei)).json();
+    assert.equal(approvedDetail.application_status, "approved");
+    const companions = await (await call(`${approvalNotice.action_url}/contact`, mei)).json();
+    assert.ok(companions.organizer);
+    assert.ok(companions.members.some((member) => member.status === "approved"));
     assert.equal((await (await call(`/activities/${a.id}`, mei)).json()).member_count, 2);
     assert.equal((await call(`/activities/${a.id}/applications`, alice, { method: "POST", body: JSON.stringify({ message: "已满员测试" }) })).status, 409);
     assert.equal(
