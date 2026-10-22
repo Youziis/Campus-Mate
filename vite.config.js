@@ -23,6 +23,9 @@ export default defineConfig({
   },
   optimizeDeps: {
     noDiscovery: true,
+    // Rebuild the Pixi optimizer bundle on each dev-server start so stale
+    // cached dep URLs cannot keep the dynamically imported Live2D module at 504.
+    force: true,
     include: ["pixi.js", "pixi-live2d-display/cubism4"],
   },
   server: {

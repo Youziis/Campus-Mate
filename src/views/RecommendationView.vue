@@ -10,7 +10,7 @@
       </div>
       <div class="recommend-actions">
         <button class="deck-action shuffle-action" :disabled="shuffling" @click="shuffleDeck">
-          <span>↻</span><b>重新洗牌</b><small>加速牌阵，刷新一批活动</small>
+          <span>↻</span><b>继续巡游</b><small>换一批尽量不同的活动</small>
         </button>
         <button class="deck-action draw-action" :disabled="shuffling" @click="drawCard">
           <span>✦</span><b>抽取缘分</b><small>匹配分越高，抽中机会越大</small>
@@ -94,6 +94,9 @@ const router = useRouter();
 const pageRoot = ref(null);
 const reelRoot = ref(null);
 const deck = ref([]);
+const candidatePool = ref([]);
+const remainingPool = ref([]);
+let previousBatchIds = new Set();
 const drawn = ref(null);
 const shuffling = ref(false);
 const hovering = ref(false);
@@ -113,22 +116,14 @@ let trackEl = null;
 let resizeObserver = null;
 let introContext;
 
-const reelCards = computed(() => deck.value.slice(0, Math.min(9, deck.value.length)));
+const reelCards = computed(() => deck.value.slice(0, 9));
 const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-function shuffled(items) {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
 
 // 抽卡按推荐分数加权：分数越高，被抽中的区间越大；0 分活动仍保留少量机会。
 function weightedDraw(items) {
-  if (!items.length) return null;
-  const weighted = items.map((item) => ({
+  const uniqueItems = [...new Map(items.filter((item) => !item.isPlaceholder).map((item) => [String(item.id), item])).values()];
+  if (!uniqueItems.length) return null;
+  const weighted = uniqueItems.map((item) => ({
     item,
     weight: Math.max(1, Number(item.recommendationScore) || 0),
   }));
@@ -143,6 +138,48 @@ function weightedDraw(items) {
   return weighted.at(-1).item;
 }
 
+function shuffled(items) {
+  const result = [...items];
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+  }
+  return result;
+}
+
+function nextBatch() {
+  if (!candidatePool.value.length) return [];
+  if (!remainingPool.value.length) remainingPool.value = [...candidatePool.value];
+
+  const recentIds = previousBatchIds;
+  const available = remainingPool.value;
+  const fresh = shuffled(available.filter((item) => !recentIds.has(String(item.id))));
+  const recent = shuffled(available.filter((item) => recentIds.has(String(item.id))));
+  const batch = [...fresh, ...recent].slice(0, 9);
+  const batchIds = new Set(batch.map((item) => String(item.id)));
+
+  // Advance each activity through the pool once before beginning another cycle.
+  remainingPool.value = available.filter((item) => !batchIds.has(String(item.id)));
+
+  // If fewer than nine unseen activities remain, fill from activities outside
+  // the previous batch first, then use the rest of the pool to keep all faces filled.
+  const fillers = [
+    ...shuffled(candidatePool.value.filter((item) => !batchIds.has(String(item.id)) && !recentIds.has(String(item.id)))),
+    ...shuffled(candidatePool.value.filter((item) => !batchIds.has(String(item.id)) && recentIds.has(String(item.id)))),
+  ];
+  while (batch.length < 9 && fillers.length) {
+    const item = fillers.shift();
+    batch.push(item);
+    batchIds.add(String(item.id));
+  }
+  const fallback = shuffled(candidatePool.value);
+  while (batch.length < 9 && fallback.length) {
+    batch.push(fallback[(batch.length - 9) % fallback.length]);
+  }
+
+  previousBatchIds = new Set(batch.map((item) => String(item.id)));
+  return batch;
+}
 const wait = (seconds) => new Promise((resolve) => gsap.delayedCall(seconds, resolve));
 
 function tweenSpeed(to, duration, ease) {
@@ -219,7 +256,7 @@ async function spin(onPeak) {
 }
 
 async function swapDeck() {
-  deck.value = shuffled(store.recommendations.value);
+  deck.value = nextBatch();
   await nextTick();
   measure();
 }
@@ -267,7 +304,10 @@ function closeDrawn() {
 async function loadDeck() {
   await store.initialize();
   await store.recommend();
-  deck.value = shuffled(store.recommendations.value);
+  candidatePool.value = [...store.recommendations.value];
+  remainingPool.value = [...candidatePool.value];
+  previousBatchIds = new Set();
+  deck.value = nextBatch();
   await setupReel();
 
   if (!prefersReducedMotion()) {
@@ -282,7 +322,11 @@ async function changeMode(nextMode) {
   if (mode.value === nextMode || shuffling.value) return;
   mode.value = nextMode;
   await store.recommend(nextMode);
-  deck.value = shuffled(store.recommendations.value);
+  candidatePool.value = [...store.recommendations.value];
+  remainingPool.value = [...candidatePool.value];
+  previousBatchIds = new Set();
+  drawn.value = null;
+  deck.value = nextBatch();
   await setupReel();
 }
 

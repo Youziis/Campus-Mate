@@ -641,7 +641,7 @@ app.get("/api/recommendations", auth, (req, res) => {
       const matchedAvailability = period ? ownDays.has(`${weekday}:${period}`) : false;
       const score = mode === "same"
         ? sharedInterests * 5 + (matchedAvailability ? 4 : 0)
-        : (sharedInterests === 0 ? 5 : Math.max(0, 4 - sharedInterests)) + (!ownNames.has(item.category) ? 2 : 0) + (matchedAvailability ? 1 : 0);
+        : Math.max(1, 10 - sharedInterests * 3) + (matchedAvailability ? 1 : 0);
       return { ...item, recommendationScore: score, sharedInterests, matchedAvailability, matchMode: mode };
     })
     .filter((item) => mode === "try" || item.recommendationScore > 0)
