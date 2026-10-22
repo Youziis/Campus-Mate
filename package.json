@@ -10,8 +10,6 @@
     "build": "node scripts/build.js",
     "start": "node server/index.js",
     "db:seed": "node server/seed.js",
-    "db:seed:bulk": "node server/seed-bulk-activities.js",
-    "covers:fetch": "node scripts/fetch-activity-covers.mjs",
     "data:export": "node scripts/project-data.js export",
     "data:import": "node scripts/project-data.js import",
     "test": "node --test test/api.test.js"
