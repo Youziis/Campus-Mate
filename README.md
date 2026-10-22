@@ -96,11 +96,23 @@ Git 同步的是数据快照，不会实时合并每个人的本地数据库。�
 - `server/index.js`：Express 接口路由。认证和权限中间件位于文件顶部，路由按认证、用户、活动、报名、评价、通知和管理功能分组。
 - `server/db.js`：SQLite 文件位置、连接设置和 13 张表的结构。新增字段时请注意，`CREATE TABLE IF NOT EXISTS` 不会给已有数据库自动加列；需要配套数据库迁移。
 - `server/seed.js`：可选的历史演示种子，用于生成预设账号和图片活动，与当前共享快照不同；已有数据时不建议重复运行，以免重新插入已删除活动或改变活动日期。
+- `server/seed-bulk-activities.js`：为 8 个活动分类各写入 4 条演示活动；相同标题会更新，不会重复插入。
 - `server/data-files.js`：首次启动恢复共享快照，已有运行库保持不变。
 - `scripts/project-data.js`：导出当前数据快照、备份并导入团队共享数据。
+- `scripts/fetch-activity-covers.mjs`：从 Wikimedia Commons 下载批量活动封面并生成图片来源与许可清单。
 - `src/App.vue`：前端页面状态、交互处理和 API 请求调用。
 
 数据库默认路径为 `server/data/campus-mate.db`，也可以通过 `.env` 中的 `DATABASE_FILE` 指定其他位置。
+
+批量补充活动时依次运行：
+
+```bash
+npm run covers:fetch
+npm run db:seed:bulk
+npm run data:export
+```
+
+封面保存在 `server/uploads/bulk-covers/`，来源与许可记录见 `docs/ACTIVITY-COVER-CREDITS.md`。
 
 运行 `npm test` 执行 API 集成测试，运行 `npm run build` 构建前端。测试覆盖登录、报名审核、成员隐私、收藏、通知、统计和管理员权限。
 
