@@ -1,69 +1,23 @@
 <script setup>
-import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from "vue";
-import { gsap } from "gsap";
-import { Flip } from "gsap/Flip";
+import { computed, onMounted, ref } from "vue";
 import ActivityCard from "../components/ActivityCard.vue";
 import { cats, formatDate, useCampus } from "../stores/campus";
 
-gsap.registerPlugin(Flip);
-
 const store = useCampus();
-const flipBox = ref(null);
 const selected = ref("全部");
-let filterAnimation;
 
-function finishFilterAnimation() {
-  filterAnimation?.progress(1).kill();
-  filterAnimation = null;
-  if (flipBox.value) flipBox.value.style.minHeight = "";
-}
-onBeforeUnmount(finishFilterAnimation);
-
-const visibleCount = computed(() =>
+// 只渲染当前分类的活动，让网格始终保持正常文档流。
+// 这样快速切换分类时不会残留 Flip 写入的绝对定位和尺寸样式。
+const filteredActivities = computed(() =>
   selected.value === "全部"
-    ? store.activities.value.length
-    : store.activities.value.filter((activity) => activity.category === selected.value).length,
+    ? store.activities.value
+    : store.activities.value.filter((activity) => activity.category === selected.value),
 );
-
-function syncVisibility() {
-  const box = flipBox.value;
-  if (!box) return;
-  box.querySelectorAll(".flip-item").forEach((item) => {
-    const shown = selected.value === "全部" || item.dataset.category === selected.value;
-    item.style.display = shown ? "flex" : "none";
-  });
-}
-
-function applyFlip() {
-  finishFilterAnimation();
-  const box = flipBox.value;
-  if (!box) return;
-  const items = [...box.querySelectorAll(".flip-item")];
-  if (!items.length) return;
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const state = reduce ? null : Flip.getState(items);
-  const lockedHeight = box.offsetHeight;
-  syncVisibility();
-  if (!state) return;
-  box.style.minHeight = `${lockedHeight}px`;
-  filterAnimation = Flip.from(state, {
-    duration: 0.7,
-    scale: true,
-    ease: "power1.inOut",
-    stagger: 0.04,
-    absolute: true,
-    onEnter: (elements) => gsap.fromTo(elements, { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.6 }),
-    onLeave: (elements) => gsap.to(elements, { opacity: 0, scale: 0, duration: 0.45 }),
-    onComplete: () => {
-      box.style.minHeight = "";
-    },
-  });
-}
+const visibleCount = computed(() => filteredActivities.value.length);
 
 function chooseCategory(name) {
   if (selected.value === name) return;
   selected.value = name;
-  applyFlip();
 }
 
 async function clearFilters() {
@@ -71,23 +25,9 @@ async function clearFilters() {
   store.category.value = "全部";
   selected.value = "全部";
   await store.search();
-  await nextTick();
-  syncVisibility();
 }
 
-watch(
-  () => store.activities.value.map((activity) => activity.id).join(","),
-  async () => {
-    await nextTick();
-    syncVisibility();
-  },
-);
-
-onMounted(async () => {
-  await store.initialize();
-  await nextTick();
-  syncVisibility();
-});
+onMounted(() => store.initialize());
 
 function publish() {
   if (store.token.value) store.newActivity();
@@ -140,8 +80,8 @@ function scrollToActivities() {
       <div v-if="store.loading.value" class="activity-grid skeleton-grid" aria-label="正在加载活动"><div v-for="index in 4" :key="index" class="skeleton-card"><span></span><i></i><i></i><i></i></div></div>
       <div v-else-if="store.loadError.value" class="state-panel error-state"><span>连接暂时中断</span><h3>活动列表没有加载成功</h3><p>{{ store.loadError.value }}</p><el-button type="primary" @click="store.load">重新加载</el-button></div>
       <template v-else-if="store.activities.value.length">
-        <div ref="flipBox" class="activity-flip">
-          <div v-for="activity in store.activities.value" :key="activity.id" class="flip-item" :data-category="activity.category">
+        <div class="activity-flip">
+          <div v-for="activity in filteredActivities" :key="activity.id" class="flip-item">
             <ActivityCard :activity="activity" />
           </div>
         </div>

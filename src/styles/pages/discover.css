@@ -348,6 +348,25 @@
   display: flex;
   min-width: 0;
   width: 100%;
+  animation: activity-filter-enter 220ms ease-out both;
+}
+
+@keyframes activity-filter-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-item {
+    animation: none;
+  }
 }
 
 .activity-flip .activity-card,
