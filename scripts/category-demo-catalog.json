@@ -1,0 +1,714 @@
+[
+  {
+    "category": "运动",
+    "key": "basketball-practice",
+    "title": "傍晚篮球投篮练习：一起找回手感",
+    "location": "学校篮球场入口",
+    "tags": [
+      "篮球",
+      "运动"
+    ],
+    "hour": 17,
+    "duration": 2,
+    "capacity": 6,
+    "details": "先做运球和定点投篮，再按人数决定是否打半场。水平不限，不打激烈身体对抗，请穿运动鞋并自带饮用水。",
+    "source": "https://cee.xmu.edu.cn/info/1045/39415.htm",
+    "imageUrl": "https://cee.xmu.edu.cn/virtual_attach_file.vsb?afc=3o7WBRM4NPnmL8oGllbMzLDLzARLNCfsnzCaLR74MRnkMm-0gihFp2hmCIa0n1yYUSysoShfMRUanlQ7Ull4Mz7ZUNCYM46VMmL4MznfUmQFLmf7MRnRnNnFMRCZM47Jqjfjo4OeoDMTQShXptQ0g47aMRl0L4N8LzlJqdknx&e=.jpg&nid=39415&oid=1614188345&tid=1045"
+  },
+  {
+    "category": "户外",
+    "key": "huandao-cycling",
+    "title": "环岛路轻骑行：沿着海岸慢慢走",
+    "location": "厦门白城沙滩公共入口",
+    "tags": [
+      "骑行",
+      "户外",
+      "摄影"
+    ],
+    "hour": 15,
+    "duration": 3,
+    "capacity": 6,
+    "details": "沿环岛路选择平缓的骑行路段，中途安排补水和拍照。自行安排合规车辆，出发前检查刹车，遵守骑行规则；遇大风降雨改期。",
+    "source": "https://k.sina.cn/article_7067753429_p1a5455bd500100l6r0.html",
+    "imageUrl": "https://k.sinaimg.cn/n/sinacn10118/307/w650h457/20190818/3dcd-icmpfwz7577085.jpg/w700d1q75cms.jpg"
+  },
+  {
+    "category": "户外",
+    "key": "botanical-walk",
+    "title": "植物园雨林散步：寻找光穿过树叶的瞬间",
+    "location": "厦门植物园西门外",
+    "tags": [
+      "徒步",
+      "植物",
+      "摄影"
+    ],
+    "hour": 9,
+    "duration": 4,
+    "capacity": 6,
+    "details": "选择植物园内开放的平缓路线散步，记录喜欢的叶片与光影。门票各自购买，不采摘植物；喷雾时间以园方当天公告为准。",
+    "source": "https://www.fjdaily.com/app/content/2022-01/04/content_1274976.html",
+    "imageUrl": "https://img1.fjdaily.com/app/images/2022-01/04/cff1e715-4557-4ad3-a274-ec78dc5e81ea.jpg"
+  },
+  {
+    "category": "户外",
+    "key": "shanhai-walk",
+    "title": "山海健康步道慢徒步：从树梢看厦门",
+    "location": "厦门山海健康步道和熙楼入口",
+    "tags": [
+      "徒步",
+      "户外",
+      "散步"
+    ],
+    "hour": 9,
+    "duration": 3,
+    "capacity": 8,
+    "details": "结伴走一段公开开放的健康步道，控制配速，按体力随时休息。请穿防滑鞋并备水，不进入封闭路段；终点和返程方式出发前确认。",
+    "source": "https://fj.sina.com.cn/news/2020-01-09/detail-iihnzahk2955616.shtml",
+    "imageUrl": "https://n.sinaimg.cn/fj/crawl/198/w399h599/20200109/53c8-imvsvza1221643.jpg"
+  },
+  {
+    "category": "户外",
+    "key": "bailuzhou-walk",
+    "title": "白鹭洲树荫散步：给自己一个放空下午",
+    "location": "厦门白鹭洲公园公共入口",
+    "tags": [
+      "散步",
+      "摄影",
+      "户外"
+    ],
+    "hour": 16,
+    "duration": 2,
+    "capacity": 6,
+    "details": "沿公园步道轻松走走，找一处树荫聊天，互相帮忙拍照。无需运动基础，不进入草坪养护区，个人饮品和交通自理。",
+    "source": "https://touch.go.qunar.com/poi/709114",
+    "imageUrl": "https://img1.qunarzz.com/travel/d3/1508/4c/dac7ef489a83a9.jpg_r_640x425x70_2a076b3f.jpg"
+  },
+  {
+    "category": "户外",
+    "key": "birdwatching",
+    "title": "筼筜湖观鸟：一起认识城市里的白鹭",
+    "location": "厦门筼筜湖观鸟廊道入口",
+    "tags": [
+      "摄影",
+      "自然",
+      "散步"
+    ],
+    "hour": 8,
+    "duration": 2,
+    "capacity": 5,
+    "details": "在公共观鸟区域安静观察白鹭，记录见到的鸟类。没有长焦也可参加，不投喂、不追逐、不播放声音诱鸟，保持与栖息地的距离。",
+    "source": "https://news.bjd.com.cn/2026/03/03/11611248.shtml",
+    "imageUrl": "https://img1.bjd.com.cn/2026/03/03/82f3eabf77319f444b30b9c28013e42c2d71e1d8.jpg"
+  },
+  {
+    "category": "户外",
+    "key": "jimei-lake",
+    "title": "龙舟池湖畔漫步：下课后看一场日落",
+    "location": "厦门集美学村龙舟池公共步道",
+    "tags": [
+      "散步",
+      "摄影",
+      "旅行"
+    ],
+    "hour": 16,
+    "duration": 2,
+    "capacity": 6,
+    "details": "沿龙舟池公共步道慢走，看看闽南建筑和水面倒影。天气晴好时等待日落，不保证能看见训练，不进入水域或影响周边教学。",
+    "source": "https://you.ctrip.com/sight/xiamen21/48744.html",
+    "imageUrl": "https://dimg04.c-ctrip.com/images/0106y120008eu13yx6E09_W_640_10000.jpg?proc=autoorient"
+  },
+  {
+    "category": "户外",
+    "key": "jimei-architecture",
+    "title": "集美学村建筑摄影：把嘉庚风格装进相册",
+    "location": "厦门集美学村公共观景步道",
+    "tags": [
+      "摄影",
+      "旅行",
+      "打卡"
+    ],
+    "hour": 14,
+    "duration": 3,
+    "capacity": 6,
+    "details": "在允许游览的公共区域寻找建筑线条、屋顶和倒影，互相交流构图。手机同样欢迎，不擅入教学生活区，拍摄人物前征求同意。",
+    "source": "https://you.ctrip.com/sight/xiamen21/2343.html",
+    "imageUrl": "https://dimg04.c-ctrip.com/images/1mh5b12000ajk54e855F9_W_640_10000.jpg?proc=autoorient"
+  },
+  {
+    "category": "学习",
+    "key": "quiet-reading",
+    "title": "晨间安静阅读：读完一直没翻开的那本书",
+    "location": "本校图书馆大厅",
+    "tags": [
+      "读书",
+      "学习"
+    ],
+    "hour": 9,
+    "duration": 2,
+    "capacity": 5,
+    "details": "各自带一本想读的书，开始前说说本次计划，结束后用一句话分享收获。阅读期间保持安静，不代占座；集合后各自按馆内规则找座位。",
+    "source": "https://archt.xmu.edu.cn/info/1161/12913.htm",
+    "imageUrl": "https://archt.xmu.edu.cn/virtual_attach_file.vsb?afc=AnR612U47YnmA7LmmNbM4TfUm9DUzfN2LzvbUmN4LNlinzv0gihFp2hmCIa0MYh2LkhkokyPLzT2LRAkMmNbnmNao7CbLmVRMRVVnmC8LmrFMR7PUm6kMNnFnzl8LlUJv2bjo4OeoDVYCDA8gDTJQty0Lz7DLSyPLmNPLYbw62T8c&e=.png&nid=12913&oid=1536669093&tid=1161"
+  },
+  {
+    "category": "学习",
+    "key": "exam-plan",
+    "title": "期末复习计划互助：把任务拆成小目标",
+    "location": "本校教学楼共享研讨区",
+    "tags": [
+      "学习",
+      "考研",
+      "复习"
+    ],
+    "hour": 19,
+    "duration": 2,
+    "capacity": 6,
+    "details": "带上课程安排或复习清单，每个人先列出本周最重要的三项任务，再一起讨论可执行的时间安排。只交流方法，不交换未经授权的试题。",
+    "source": "https://www.sohu.com/na/459216185_267106",
+    "imageUrl": "https://p5.itc.cn/q_70/images03/20210406/7f18e86c8f964df3b769bf4a8c0087bb.jpeg"
+  },
+  {
+    "category": "学习",
+    "key": "english-corner",
+    "title": "英语口语小组：从校园生活聊起",
+    "location": "外语楼公共交流区",
+    "tags": [
+      "英语",
+      "口语",
+      "CET4"
+    ],
+    "hour": 19,
+    "duration": 2,
+    "capacity": 6,
+    "details": "围绕自我介绍、校园生活和旅行轮流交流，表达卡顿可以用中文补充。准备一个想讨论的小话题，互相鼓励，不纠缠口音或强迫发言。",
+    "source": "https://oec.xmu.edu.cn/info/1042/2921.htm",
+    "imageUrl": "https://oec.xmu.edu.cn/virtual_attach_file.vsb?afc=YLRM4RMmGDnmUsL8lCYM7lsLmvPoRvibnlL8nzGPUlUZL470gihFp2hmCIa0M1yZUShfn1ybM4AVM4-bL47PUzCaLzUDU4l8nzLbMlrVMlrFUmviLzNDUNQFLmL8ozUZgtXaQ4Oeo4xjqjXsqjTZ_ShXptQ0g47aMR-0LmNYLSbw62D8c&e=.jpg&nid=2921&oid=1933934427&tid=1042"
+  },
+  {
+    "category": "学习",
+    "key": "coding-pair",
+    "title": "结对编程小练习：一起完成一个待办页面",
+    "location": "信息楼公共自习区",
+    "tags": [
+      "编程",
+      "前端",
+      "学习"
+    ],
+    "hour": 14,
+    "duration": 3,
+    "capacity": 4,
+    "details": "自带电脑，用熟悉的技术完成一个简单待办页面，轮流编写和讲解代码。遇到问题一起查文档，结束前整理一份小复盘，不要求做完整项目。",
+    "source": "https://news.uestc.edu.cn/info/1002/1549.htm",
+    "imageUrl": "https://news.uestc.edu.cn/__local/5/4D/64/8ADB963B9C63CC148D71647EFCF_7F7CDE2F_4E8EE.png?e=.png"
+  },
+  {
+    "category": "学习",
+    "key": "study-focus",
+    "title": "午后专注自习：两轮番茄钟陪伴",
+    "location": "本校图书馆大厅",
+    "tags": [
+      "自习",
+      "学习",
+      "考研"
+    ],
+    "hour": 14,
+    "duration": 2,
+    "capacity": 6,
+    "details": "各自准备作业或学习材料，采用四十分钟专注、十分钟休息的节奏。计时只作为建议，休息交流请到馆外，不影响其他读者。",
+    "source": "https://www.xmht.com/library.asp",
+    "imageUrl": "https://www.xmht.com/images/fengguang/%E5%AD%A6%E5%AD%90%20%E5%A4%A7%E5%9E%8B%E5%9B%BE%E4%B9%A6%E9%98%85%E8%A7%88%E5%AE%A4%E4%B8%80%E8%A7%92.jpg"
+  },
+  {
+    "category": "学习",
+    "key": "reading-notes",
+    "title": "读书笔记交换：分享一段你画线的文字",
+    "location": "本校图书馆公共讨论区",
+    "tags": [
+      "读书",
+      "分享",
+      "学习"
+    ],
+    "hour": 15,
+    "duration": 2,
+    "capacity": 6,
+    "details": "每个人准备一段喜欢的文字和一页读书笔记，轮流分享自己的理解。观点不同也欢迎讨论，只分享自己的摘录与感受，不批量复制书籍。",
+    "source": "https://www.jgxy.xmu.edu.cn/info/147ly1zn.html",
+    "imageUrl": "https://www.jgxy.xmu.edu.cn/upload/ee/8bab4c7eb2a1e0d678802fea5d073e.jpg"
+  },
+  {
+    "category": "学习",
+    "key": "course-help",
+    "title": "课程难点互助：带着问题来，带着思路走",
+    "location": "教学楼开放研讨室",
+    "tags": [
+      "学习",
+      "互助",
+      "复习"
+    ],
+    "hour": 19,
+    "duration": 2,
+    "capacity": 6,
+    "details": "提前写下两到三个课程问题，现场先按学科分组，再用白板或纸笔讲清思路。鼓励共同理解，不代做课程作业，离场前各自整理笔记。",
+    "source": "https://chinese.xmu.edu.cn/info/1491/33921.htm",
+    "imageUrl": "https://chinese.xmu.edu.cn/virtual_attach_file.vsb?afc=hMz73bM7n7LNCaUBz-snzA2LmNbU8nGkLmLYUl-PnzvYM4L0gihFp2hmCIa0UYyiMYhkoSyPU4MRUNUPnzr2LRCYUznVoRCsUNCPolQfUzMFnNrfol-8nRTFnz-PMmNJv2bjo4OeosXb6sAZgDTJQty0LzUbLSy4L4NYLSbw62f8c&e=.png&nid=33921&oid=1905331939&tid=1491"
+  },
+  {
+    "category": "生活",
+    "key": "pour-over",
+    "title": "手冲咖啡初体验：从闻香到第一杯",
+    "location": "学校周边可预约的咖啡体验区",
+    "tags": [
+      "咖啡",
+      "生活",
+      "探店"
+    ],
+    "hour": 14,
+    "duration": 2,
+    "capacity": 5,
+    "details": "一起认识研磨度、注水和风味记录，零基础也能参与。场地和器具需提前预约，费用报名后确认，避免空腹大量饮用含咖啡因饮品。",
+    "source": "https://finance.sina.cn/2026-04-08/detail-inhtttam6635041.d.html?vt=4",
+    "imageUrl": "https://k.sinaimg.cn/n/spider20260408/150/w1000h750/20260408/be53-1a4b963d503c15318343fbde56ce350c.jpg/w700d1q75cms.jpg?by=cms_fixed_width"
+  },
+  {
+    "category": "生活",
+    "key": "coffee-taste",
+    "title": "咖啡风味交流：说说你喝到的味道",
+    "location": "本校生活服务中心公共交流区",
+    "tags": [
+      "咖啡",
+      "交友",
+      "生活"
+    ],
+    "hour": 15,
+    "duration": 2,
+    "capacity": 6,
+    "details": "自带一种熟悉的咖啡或风味笔记，聊聊酸甜、香气和自己的偏好。没有专业知识也可以，只做轻松交流，饮品各自准备。",
+    "source": "https://www.xujc.com/info/dnol2kln.html",
+    "imageUrl": "https://www.xujc.com/upload/1e/7ae7308ea7f73eefc892a8ab0c27c4.jpg"
+  },
+  {
+    "category": "生活",
+    "key": "succulent-diy",
+    "title": "桌面多肉小花园：给宿舍添一点绿",
+    "location": "学生活动中心共享手作区",
+    "tags": [
+      "植物",
+      "手作",
+      "生活"
+    ],
+    "hour": 14,
+    "duration": 2,
+    "capacity": 6,
+    "details": "自带小花盆和少量多肉，一起学习换盆、配土和日常养护。组织者提前汇总材料需求并按实际分摊，结束后清理桌面和土屑。",
+    "source": "https://hqc.fzu.edu.cn/info/1033/2528.htm",
+    "imageUrl": "https://hqc.fzu.edu.cn/__local/B/76/D2/5853EDC3BC67A4ACF9AF22D1599_0B8B9892_A3126.jpg"
+  },
+  {
+    "category": "生活",
+    "key": "terrarium",
+    "title": "玻璃微景观共创：把小森林放在桌上",
+    "location": "学生活动中心共享手作区",
+    "tags": [
+      "手作",
+      "植物",
+      "摄影"
+    ],
+    "hour": 15,
+    "duration": 2,
+    "capacity": 6,
+    "details": "用玻璃容器、基质和适宜的小植物搭建微景观，互相交换布局想法。材料提前商量，不从公园采集苔藓；作品各自带走。",
+    "source": "https://sph.xmu.edu.cn/info/1961/58125.htm",
+    "imageUrl": "https://sph.xmu.edu.cn/virtual_attach_file.vsb?afc=sUmGZ4Mm98M7U8UblnVnlCZL7-8M7-E4MmrVMRMVU8UDMmC0gihFp2hmCIa0L1hRnkh2okhkL46VMNr7UlnRMNQfLzW2M8U4MRUYMm78oRnFMzfkUNMfMRWFM8-8LmlJv2bjo4OeosMaqkhXptQ0g47bMm70Mz9PLmlJqdenx&e=.png&nid=58125&oid=1865939552&tid=1961"
+  },
+  {
+    "category": "生活",
+    "key": "coffee-ground-planting",
+    "title": "旧杯子新生命：咖啡渣种植小实验",
+    "location": "本校劳动教育实践区",
+    "tags": [
+      "植物",
+      "环保",
+      "手作"
+    ],
+    "hour": 14,
+    "duration": 2,
+    "capacity": 6,
+    "details": "把不用的杯子改造成小盆栽，交流咖啡渣的处理和少量混土方法。咖啡渣需先妥善处理，不直接大量堆在根部，工具材料提前确认。",
+    "source": "https://www.xmpaoyou.com/newDetail/137",
+    "imageUrl": "https://www.xmpaoyou.com/upfiles/images/17738022746280.JPG"
+  },
+  {
+    "category": "社交",
+    "key": "bobing-friends",
+    "title": "闽南博饼体验局：听骰子响，交几个新朋友",
+    "location": "学生活动中心公共交流区",
+    "tags": [
+      "桌游",
+      "社交",
+      "传统文化"
+    ],
+    "hour": 19,
+    "duration": 2,
+    "capacity": 8,
+    "details": "现场讲解闽南博饼的趣味规则，以贴纸和小零食作为纪念，不涉及金钱投注。没接触过也能参加，先自我介绍，再自由轮换体验。",
+    "source": "https://www.xujc.com/info/dnole0qn.html",
+    "imageUrl": "https://www.xujc.com/uploads2/img/2022/09/13/2022091316053780.jpg"
+  },
+  {
+    "category": "美食",
+    "key": "oyster-taste",
+    "title": "海蛎煎探店：外脆还是软嫩，你站哪一边",
+    "location": "厦门沙坡尾公共集合点",
+    "tags": [
+      "美食",
+      "探店",
+      "海蛎煎"
+    ],
+    "hour": 17,
+    "duration": 2,
+    "capacity": 5,
+    "details": "一起试试海蛎煎和当地小吃，聊聊喜欢的口感。店铺和预算报名后共同决定，餐费各自结算；海鲜或蛋类过敏者请提前核实食材。",
+    "source": "https://www.sohu.com/a/311327882_357201",
+    "imageUrl": "https://5b0988e595225.cdn.sohucs.com/images/20190501/bbc52f3ff217436f992b09216e801f53.jpeg"
+  },
+  {
+    "category": "美食",
+    "key": "ginger-duck",
+    "title": "八市姜母鸭拼桌：一锅热气配几位新朋友",
+    "location": "厦门第八市场公共入口",
+    "tags": [
+      "美食",
+      "探店",
+      "姜母鸭"
+    ],
+    "hour": 18,
+    "duration": 2,
+    "capacity": 6,
+    "details": "在八市附近选择营业中的店铺一起吃姜母鸭，点菜前确认人数、预算和忌口。餐费按实际协商平摊，不预付给陌生个人。",
+    "source": "https://k.sina.cn/article_6404365592_17dbadd1800100zsw7.html",
+    "imageUrl": "https://k.sinaimg.cn/n/sinakd10113/251/w640h411/20220902/eb0a-b1e01fba2536068e4fc3dca0b8f3067e.png/w700d1q75cms.jpg"
+  },
+  {
+    "category": "美食",
+    "key": "rice-dumpling",
+    "title": "烧肉粽小吃散步：一起尝尝闽南咸香",
+    "location": "厦门中山路步行街入口",
+    "tags": [
+      "美食",
+      "探店",
+      "闽南小吃"
+    ],
+    "hour": 16,
+    "duration": 2,
+    "capacity": 5,
+    "details": "从烧肉粽开始认识闽南小吃，按各自食量点单，吃完在公共街区散步。提前确认花生等配料与忌口，消费各自结算。",
+    "source": "https://www.trip.com/moments/poi-1980shao-rou-zong-354171/",
+    "imageUrl": "https://ak-d.tripcdn.com/images/1mi1w12000j87dkwi2FD3.jpg?proc=source%2Ftrip"
+  },
+  {
+    "category": "美食",
+    "key": "noodle-toppings",
+    "title": "沙茶面配料交流局：这次试试不同搭配",
+    "location": "厦门老城区公共集合点",
+    "tags": [
+      "美食",
+      "沙茶面",
+      "探店"
+    ],
+    "hour": 17,
+    "duration": 2,
+    "capacity": 5,
+    "details": "每个人选一套自己喜欢的配料，聊聊沙茶汤底和吃法，不要求跑很多家店。店铺提前商量，花生及海鲜过敏者需先向商家确认。",
+    "source": "https://k.sina.cn/article_6440840537_17fe76d5900100biui.html",
+    "imageUrl": "https://k.sinaimg.cn/n/sinacn02/757/w640h917/20180730/047c-hfxsxzh7252197.jpg/w700d1q75cms.jpg"
+  },
+  {
+    "category": "美食",
+    "key": "cake-afternoon",
+    "title": "集美蛋糕下午茶：用一块甜品交换近况",
+    "location": "厦门集美商圈公共入口",
+    "tags": [
+      "甜品",
+      "美食",
+      "探店"
+    ],
+    "hour": 15,
+    "duration": 2,
+    "capacity": 5,
+    "details": "挑一家营业中的甜品店，各点一份喜欢的蛋糕或饮品，聊聊最近的小事。预算先沟通，消费各自结算，不要求拍照打卡。",
+    "source": "https://www.sina.cn/news/detail/5264513838613127.html",
+    "imageUrl": "https://wx3.sinaimg.cn/middle/005GnzwDgy1ia4m608ks1j30wi17c12j.jpg"
+  },
+  {
+    "category": "美食",
+    "key": "flower-tea",
+    "title": "花店里的下午茶：边赏花边尝甜点",
+    "location": "厦门思明区公共集合点",
+    "tags": [
+      "甜品",
+      "探店",
+      "摄影"
+    ],
+    "hour": 14,
+    "duration": 2,
+    "capacity": 5,
+    "details": "寻找有花艺布置的咖啡甜品店，慢慢吃点心、聊聊天。具体店铺、营业情况和预算提前确认，拍照不影响店内其他顾客。",
+    "source": "https://k.sina.com.cn/article_2552110130_981e1c32027007gzv.html",
+    "imageUrl": "https://n.sinaimg.cn/sinacn13/530/w800h530/20180606/78ea-hcqccip2467381.jpg"
+  },
+  {
+    "category": "美食",
+    "key": "rose-dessert",
+    "title": "玫瑰主题甜品探店：收集一份粉色心情",
+    "location": "厦门思明区商圈公共入口",
+    "tags": [
+      "甜品",
+      "美食",
+      "打卡"
+    ],
+    "hour": 15,
+    "duration": 2,
+    "capacity": 5,
+    "details": "一起尝试玫瑰风味或粉色主题甜点，交流口味和拍照构图。菜单以商家当日供应为准，不保证复刻配图款式，费用各自承担。",
+    "source": "https://www.ly.com/travels/1043843.html",
+    "imageUrl": "https://pic5.40017.cn/02/000/88/f8/rBLkCVtpibaAX4YFAATTgBESCmU470_680x_02.jpg"
+  },
+  {
+    "category": "文化",
+    "key": "overseas-museum",
+    "title": "华侨历史结伴看展：听一段跨海的故事",
+    "location": "厦门华侨博物院公共入口",
+    "tags": [
+      "博物馆",
+      "文化",
+      "历史"
+    ],
+    "hour": 10,
+    "duration": 3,
+    "capacity": 6,
+    "details": "结伴参观开放展厅，各自挑选一个感兴趣的故事，结束后分享。开放和预约要求以馆方公告为准，封面为历史报道配图，不表示原展览仍在进行。",
+    "source": "https://miec.fzu.edu.cn/info/1022/1624.htm",
+    "imageUrl": "https://miec.fzu.edu.cn/__local/1/08/76/21244B29C42A9E1CE5F70179813_405E841D_1E01A.jpg"
+  },
+  {
+    "category": "文化",
+    "key": "heritage-exhibit",
+    "title": "文化遗产观察局：从一件文物认识一座城",
+    "location": "厦门市博物馆公共入口",
+    "tags": [
+      "展览",
+      "文化",
+      "历史"
+    ],
+    "hour": 10,
+    "duration": 3,
+    "capacity": 6,
+    "details": "一起寻找展品中的纹样、材料和日常生活线索，不需要历史基础。参观范围以当天开放展厅为准，不使用闪光灯，遵守现场拍摄规定。",
+    "source": "https://wmf.fjsen.com/2026-05/19/content_32187165.htm",
+    "imageUrl": "https://wmf.fjsen.com/images/2026-05/19/32187165_447b15b7-4678-425d-a53a-c01422757037.png"
+  },
+  {
+    "category": "文化",
+    "key": "minnan-heritage",
+    "title": "闽南非遗交流：你知道哪些家乡手艺",
+    "location": "本校图书馆公共讨论区",
+    "tags": [
+      "传统文化",
+      "分享",
+      "手作"
+    ],
+    "hour": 15,
+    "duration": 2,
+    "capacity": 6,
+    "details": "各自准备一项感兴趣的闽南手艺或家乡习俗，用图片、故事或亲身经历介绍。配图为文化参访场景，活动是校内交流，不代表原机构举办。",
+    "source": "https://wlt.fujian.gov.cn/wldt/tsdt/202411/t20241127_6577114.htm",
+    "imageUrl": "https://wlt.fujian.gov.cn/wldt/tsdt/202411/W020241127586400604191.png"
+  },
+  {
+    "category": "文化",
+    "key": "library-exhibit",
+    "title": "城市图书馆漫游：看展、找书、聊阅读",
+    "location": "厦门市图书馆文化艺术中心馆公共入口",
+    "tags": [
+      "读书",
+      "文化",
+      "展览"
+    ],
+    "hour": 14,
+    "duration": 3,
+    "capacity": 6,
+    "details": "一起浏览开放的阅读空间和公共展区，各自找一本想借阅的书。借阅须按馆方规则办理，展览内容与开放安排以当日公告为准。",
+    "source": "https://you.ctrip.com/sight/xiamen21/2031539.html",
+    "imageUrl": "https://dimg04.c-ctrip.com/images/1mh1312000c16yevq9751_W_640_10000.jpg?proc=autoorient"
+  },
+  {
+    "category": "文化",
+    "key": "painting-exchange",
+    "title": "蓝白艺术欣赏会：从扎染纹样聊起",
+    "location": "本校公共文化交流室",
+    "tags": [
+      "绘画",
+      "文化",
+      "分享"
+    ],
+    "hour": 15,
+    "duration": 2,
+    "capacity": 6,
+    "details": "每人准备一幅喜欢的扎染或纺织艺术作品资料，从颜色、图案或故事出发交流。配图来自历史展览报道，本次是同学自发欣赏交流，不冒用原展览名义。",
+    "source": "https://www.xujc.com/info/64ek6q54.html",
+    "imageUrl": "https://www.xujc.com/upload/57/73e140de4fbc98acc8965b60f57203.jpg"
+  },
+  {
+    "category": "艺术",
+    "key": "tie-dye",
+    "title": "蓝白扎染初体验：做一块属于自己的布",
+    "location": "学生活动中心共享手作区",
+    "tags": [
+      "手作",
+      "扎染",
+      "艺术"
+    ],
+    "hour": 14,
+    "duration": 3,
+    "capacity": 6,
+    "details": "从折叠、捆扎到染色，尝试做一块简单的蓝白图案布。材料提前确认，使用适合手作的染料并做好桌面防护，成品各自带走。",
+    "source": "https://www.xujc.com/info/wnle8zqg.html",
+    "imageUrl": "https://www.xujc.com/upload/03/995d827eb5dbbf4069156d9fd7a69c.jpg"
+  },
+  {
+    "category": "艺术",
+    "key": "lacquer-fan",
+    "title": "流动色彩漆扇体验：每一把都不一样",
+    "location": "本校开放手作教室",
+    "tags": [
+      "手作",
+      "绘画",
+      "艺术"
+    ],
+    "hour": 14,
+    "duration": 2,
+    "capacity": 6,
+    "details": "使用适合场地的水拓颜料体验扇面配色与转印，图案随机不追求复制。材料与通风条件提前确认，不将体验作品称作专业传统大漆工艺。",
+    "source": "https://cailiao.just.edu.cn/2024/0515/c4164a343788/page.htm",
+    "imageUrl": "https://cailiao.just.edu.cn/_upload/article/images/54/d3/aa1d62964a13947feae415c7b1af/eb9aea07-3828-447a-b3b9-939746edfaa3.jpg"
+  },
+  {
+    "category": "艺术",
+    "key": "paper-petals",
+    "title": "纸上花瓣共创：剪一幅立体小作品",
+    "location": "艺术楼公共手作区",
+    "tags": [
+      "剪纸",
+      "手作",
+      "绘画"
+    ],
+    "hour": 14,
+    "duration": 2,
+    "capacity": 6,
+    "details": "用彩纸与底板尝试简单的立体花瓣构图，互相交流配色。工具统一登记，使用剪刀和刻刀时注意安全，作品完成后拍照留念。",
+    "source": "https://xaxq.xmu.edu.cn/info/1032/30055.htm",
+    "imageUrl": "https://xaxq.xmu.edu.cn/virtual_attach_file.vsb?afc=Jn7U0DMmTVolVRUazV2olC4ol-iM4LPPMNlPL4GiUNl8nNU0gihFp2hmCIa0USyiMSyYnkyZMzlPoRN8MNCYnm-sLRvbL4rRM8W7LRUin7VFU4vYUz7inzTFMlUZM4NJqjfjo4OeosAA_d70qIbtpYyPLRLYg4LaLRligtA8pUYcc&e=.jpg&nid=30055&oid=1701703785&tid=1032"
+  },
+  {
+    "category": "艺术",
+    "key": "relief-color",
+    "title": "石膏小摆件涂色：把烦恼交给颜色",
+    "location": "学生活动中心共享手作区",
+    "tags": [
+      "绘画",
+      "手作",
+      "减压"
+    ],
+    "hour": 15,
+    "duration": 2,
+    "capacity": 6,
+    "details": "选择小型石膏白坯进行涂色，不要求绘画基础。先试色再上色，颜料和白坯按实际用量分摊，结束后清洗工具并整理场地。",
+    "source": "https://gifts.xmu.edu.cn/info/1110/175761.htm",
+    "imageUrl": "https://gifts.xmu.edu.cn/virtual_attach_file.vsb?afc=PUlWYRUl7DUNQfL48-ZLzCbUzLaU4U8YU8UZnzrVLmQ7M7C0gihFp2hmCIa0LYyDM1h2oShfLRn7UNVkM7nVLNQkL7VfnzGZMzf2L4rfnmAFoR-iL77DU8VFL4UDolCJqjfTQ4Oeo4xjqIQ8vYhXptQ0g47PLzG0LzviM4CPgtA8pUicc&e=.jpeg&nid=175761&oid=2097400498&tid=1110"
+  },
+  {
+    "category": "艺术",
+    "key": "shell-inlay",
+    "title": "螺钿饰品入门：拼一枚会发光的小胸针",
+    "location": "本校开放手作教室",
+    "tags": [
+      "手作",
+      "传统文化",
+      "艺术"
+    ],
+    "hour": 14,
+    "duration": 3,
+    "capacity": 5,
+    "details": "使用预处理好的贝片与饰品底托尝试简易拼贴，交流图案设计。材料包提前确认，不现场切磨贝壳，胶粘步骤按产品说明操作。",
+    "source": "https://guoguan.xmu.edu.cn/info/1040/16169.htm",
+    "imageUrl": "https://guoguan.xmu.edu.cn/virtual_attach_file.vsb?afc=1M7Qm2nz6RLRGZMNR7DnzGbnRnfMlLT4MRQVL8lYnmCsn7U0gihFp2hmCIa0okhkn1hRnShkn7MVUzUDLNnfn7CYLzUbLlLPLzr2LR7inRnFMznRnRf2Mm6FLz7inN-bgjfJQ4Oeo4xj6Ihj6IVJL1hXptQ0g47aMRG0LzCPMmNJqdtnx&e=.png&nid=16169&oid=2146527947&tid=1040"
+  },
+  {
+    "category": "艺术",
+    "key": "brush-calligraphy",
+    "title": "毛笔字慢练：从一横一竖开始",
+    "location": "本校国学社公共活动室",
+    "tags": [
+      "书法",
+      "传统文化",
+      "艺术"
+    ],
+    "hour": 14,
+    "duration": 2,
+    "capacity": 6,
+    "details": "从握笔和基础笔画开始练习，再临摹喜欢的简单字。纸墨与毛笔可以自带或提前凑齐，不要求写得好，结束后各选一张保存。",
+    "source": "https://www.jgxy.xmu.edu.cn/info/1n6r86xn.html",
+    "imageUrl": "https://www.jgxy.xmu.edu.cn/upload/65/58ebf211d62760a318b0465c1ac7c4.jpg"
+  },
+  {
+    "category": "艺术",
+    "key": "paper-bookmark",
+    "title": "手工纸书签：给下一本书留个标记",
+    "location": "图书馆公共手作区",
+    "tags": [
+      "手作",
+      "读书",
+      "艺术"
+    ],
+    "hour": 15,
+    "duration": 2,
+    "capacity": 6,
+    "details": "用纸浆或现成手工纸制作小书签，加入适合的纸纤维装饰并设计文字。材料、干燥和领取方式提前说明，遵守场地清洁规则。",
+    "source": "https://library.xmu.edu.cn/?locale=zh_cn&q0=0&sw=2025",
+    "imageUrl": "https://library.xmu.edu.cn/virtual_attach_file.vsb?afc=5n7LCbn7MfM4GDnQNlDMm9bL8lbozGqZLN-iLzvYoll4L7U0gihFp2hmCIa0MkyZMYybUSyDL4QfM7VRL7liU4T2o7nVMmV2MRUaL8QkLNrFn77snzvPoRAFMmrVL49Jqjfjo4OeoDPXCjWAvjNYLR-4gDTJQty0gzL0gzLJqdpnx&e=.jpg&oid=1968931208"
+  },
+  {
+    "category": "艺术",
+    "key": "fan-painting",
+    "title": "团扇绘画小聚：把喜欢的风景画下来",
+    "location": "艺术楼公共画室",
+    "tags": [
+      "绘画",
+      "手作",
+      "艺术"
+    ],
+    "hour": 14,
+    "duration": 2,
+    "capacity": 6,
+    "details": "带一张喜欢的风景照片作参考，在空白团扇上用简单线条和颜色记录。参考照片只作学习交流，颜料与扇面按实际费用分摊。",
+    "source": "https://sph.xmu.edu.cn/info/1961/70375.htm",
+    "imageUrl": "https://sph.xmu.edu.cn/virtual_attach_file.vsb?afc=oL4CuPL4CbUlCanUzTRU4-PMzLbL4Cn4L7UbUzGiLmUiM7-0gihFp2hmCIa0n1ysnShVM1yDUN-PnRNDn7laM878UllDUm9PLl-aMRLYM7rFL77bL7L4LRfFL8-iLllJqjfjo4OeosMaqkhXptQ0g47bMm70M4G4M4lJqdSnx&e=.jpg&nid=70375&oid=1865939552&tid=1961"
+  },
+  {
+    "category": "艺术",
+    "key": "paper-cutting",
+    "title": "纸艺纹样练习：一折一剪的小惊喜",
+    "location": "学生活动中心共享手作区",
+    "tags": [
+      "剪纸",
+      "手作",
+      "传统文化"
+    ],
+    "hour": 15,
+    "duration": 2,
+    "capacity": 6,
+    "details": "从对折剪纸和几何纹样练起，互相展示不同折法带来的图案。自带或统一准备彩纸，剪刀妥善收放，完成后清理碎纸。",
+    "source": "https://library.xmu.edu.cn/info/6591/15488865.htm",
+    "imageUrl": "https://library.xmu.edu.cn/virtual_attach_file.vsb?afc=mL4vNDUmfVnRUsnT7UbM7-aLm-YMmCtDoz78LzCPLlWRLm70gihFp2hmCIa0MkyinShfokhkLNlaLmGbLl-DL4n7nR9ZnlL4n7Qknz-4U8WFUzMVMzAVL7WFM7lbM4-Jqjfjo4OeoDPXCjWAvjNYLR-4gDTJQty0MmlbLSyPMzUZoR9DMSbw62j8c&e=.jpg&nid=15488865&oid=1968931208&tid=6591"
+  }
+]
